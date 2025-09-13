@@ -48,12 +48,4 @@ try:
         st.markdown("---")
 
 except Exception as e:
-    st.error(f"Failed to fetch Seed Stock: {e}")        with cols_bottom[0]:
-            st.write(f"Stock: {qty}")
-        with cols_bottom[1]:
-            st.write(f"Cost: {sheckle_cost} Sheckles")
-
-        st.markdown("---")
-
-except Exception as e:
     st.error(f"Failed to fetch Seed Stock: {e}")
