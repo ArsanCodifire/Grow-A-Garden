@@ -13,7 +13,10 @@ try:
     with httpx.Client(timeout=10) as client:
         data = client.get(API_URL).json()
         data.sort(key=lambda x: SEED_ORDER.index(x["name"]) if x["name"] in SEED_ORDER else 999)
-
+        if isinstance(data, dict):
+            data = [{"name": k, **v} for k, v in data.items()]
+        
+    
     for item in data:
         name = item["name"]
         qty = item.get("quantity", 0)
