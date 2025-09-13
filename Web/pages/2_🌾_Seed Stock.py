@@ -11,23 +11,27 @@ st.title("🌾 Seed Stock")
 
 try:
     with httpx.Client(timeout=10) as client:
-        data = client.get(API_URL).json()
+        resp = client.get(API_URL)
+        try:
+            data = resp.json()
+        except Exception:
+            st.error("API returned invalid JSON")
+            st.stop()
 
     # Ensure data is a list of dicts
     if isinstance(data, dict):
         data = [{"name": k, **v} for k, v in data.items()]
-    elif not isinstance(data, list):
-        st.error("Invalid data format from API")
+    elif isinstance(data, list):
+        data = [x for x in data if isinstance(x, dict)]
+    else:
+        st.error("API returned an unexpected format")
         st.stop()
 
-    # Keep only dicts to avoid errors
-    data = [x for x in data if isinstance(x, dict)]
-
     # Sort according to SEED_ORDER
-    data.sort(key=lambda x: SEED_ORDER.index(x["name"]) if x["name"] in SEED_ORDER else 999)
+    data.sort(key=lambda x: SEED_ORDER.index(x.get("name", "")) if x.get("name") in SEED_ORDER else 999)
 
     for item in data:
-        name = item.get("name")
+        name = item.get("name", "Unknown")
         qty = item.get("quantity", 0)
 
         # Fetch rarity info
