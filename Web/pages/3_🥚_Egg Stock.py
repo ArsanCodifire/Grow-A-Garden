@@ -6,15 +6,14 @@ import os
 IMG_FOLDER = "../images"
 
 st.title("🥚 Egg Stock")
-
 API_URL = "https://growagardenstock.vercel.app/api/stock/egg"
 
 with httpx.Client(timeout=10) as client:
     resp = client.get(API_URL)
     data = resp.json()
 
-for item in data["items"]:
-    name = item["name"]
+for item in data.get("items", []):
+    name = item.get("name", "Unknown")
     qty = item.get("quantity", 0)
     rarity_name, rarity_icon, sheckle_cost = rarity_data.get(name, ("Unknown", None, 0))
 
