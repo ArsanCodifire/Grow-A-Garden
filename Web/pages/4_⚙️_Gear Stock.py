@@ -1,7 +1,7 @@
 import streamlit as st
 import httpx
 from rarity import rarity_data
-import 
+import os
 
 IMG_FOLDER = os.path.join(os.path.dirname(__file__), "..", "images")
 API_URL = "https://gagapi.onrender.com/seeds"
