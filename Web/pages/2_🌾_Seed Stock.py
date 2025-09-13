@@ -19,8 +19,11 @@ try:
 
         cols = st.columns([1, 3, 2, 2])
         with cols[0]:
-            if rarity_icon:
-                st.image(os.path.join(IMG_FOLDER, rarity_icon), width=30)
+            icon_path = os.path.join(IMG_FOLDER, rarity_icon) if rarity_icon else None
+if icon_path and os.path.exists(icon_path):
+    st.image(icon_path, width=30)
+else:
+    st.write("❌")  # or just skip
         with cols[1]:
             st.write(name)
         with cols[2]:
