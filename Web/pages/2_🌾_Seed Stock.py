@@ -11,24 +11,13 @@ st.title("🌾 Seed Stock")
 
 try:
     with httpx.Client(timeout=10) as client:
-        resp = client.get(API_URL)
-        try:
-            data = resp.json()
-        except Exception:
-            st.error("API returned invalid JSON")
-            st.stop()
+        data = client.get(API_URL).json()  # Already a list of dicts
 
-    # Convert to list of dicts if needed
-    if isinstance(data, dict):
-        data = [{"name": k, **v} for k, v in data.items()]
-    elif isinstance(data, list):
-        data = [x for x in data if isinstance(x, dict)]
-    else:
-        st.error("API returned unexpected data type")
-        st.stop()
+    # Keep only dicts just in case
+    data = [x for x in data if isinstance(x, dict)]
 
-    # Sort seeds according to SEED_ORDER
-    data.sort(key=lambda x: SEED_ORDER.index(x.get("name", "")) if x.get("name") in SEED_ORDER else 999)
+    # Sort according to SEED_ORDER
+    data.sort(key=lambda x: SEED_ORDER.index(x["name"]) if x["name"] in SEED_ORDER else 999)
 
     for item in data:
         name = item.get("name", "Unknown")
@@ -37,16 +26,16 @@ try:
 
         cols_top = st.columns([1, 4, 1])
         with cols_top[0]:
-            seed_img_path = os.path.join(IMG_FOLDER, f"{name}.png")
-            if os.path.exists(seed_img_path):
-                st.image(seed_img_path, width=40)
+            seed_img = os.path.join(IMG_FOLDER, f"{name}.png")
+            if os.path.exists(seed_img):
+                st.image(seed_img, width=40)
         with cols_top[1]:
             st.write(name)
         with cols_top[2]:
             if rarity_icon:
-                rarity_img_path = os.path.join(IMG_FOLDER, rarity_icon)
-                if os.path.exists(rarity_img_path):
-                    st.image(rarity_img_path, width=30)
+                rarity_img = os.path.join(IMG_FOLDER, rarity_icon)
+                if os.path.exists(rarity_img):
+                    st.image(rarity_img, width=30)
 
         cols_bottom = st.columns([1, 1])
         with cols_bottom[0]:
