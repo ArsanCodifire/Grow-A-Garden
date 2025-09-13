@@ -11,7 +11,7 @@ st.title("🌾 Seed Stock")
 
 try:
     with httpx.Client(timeout=10) as client:
-    data = client.get(API_URL).json()
+        data = client.get(API_URL).json()
 
     # Keep only dicts to avoid errors
     data = [x for x in data if isinstance(x, dict)]
