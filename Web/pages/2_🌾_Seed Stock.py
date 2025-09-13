@@ -14,11 +14,6 @@ try:
         data = client.get(API_URL).json()
         data.sort(key=lambda x: SEED_ORDER.index(x["name"]) if x["name"] in SEED_ORDER else 999)
 
-for item in data:
-    print(item["name"], item["stock"], item["cost"])
-    for item in sorted_data:
-        print(item["name"])
-
     for item in data:
         name = item["name"]
         qty = item.get("quantity", 0)
