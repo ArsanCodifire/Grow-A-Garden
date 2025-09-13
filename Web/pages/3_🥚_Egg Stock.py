@@ -3,7 +3,7 @@ import httpx
 from rarity import rarity_data
 import os
 
-IMG_FOLDER = os.path.join(os.path.dirname(__file__), "..", "images")
+IMG_FOLDER = os.path.join(os.path.dirname(__file__), "Images")
 API_URL = "https://gagapi.onrender.com/eggs"
 
 st.title("🥚 Egg Stock")
@@ -20,7 +20,11 @@ try:
         cols = st.columns([1, 3, 2, 2])
         with cols[0]:
             if rarity_icon:
-                st.image(os.path.join(IMG_FOLDER, rarity_icon), width=30)
+                icon_path = os.path.join(IMG_FOLDER, rarity_icon)
+                if os.path.isfile(icon_path):
+                    st.image(icon_path, width=30)
+                else:
+                    st.write("❓")
         with cols[1]:
             st.write(name)
         with cols[2]:
