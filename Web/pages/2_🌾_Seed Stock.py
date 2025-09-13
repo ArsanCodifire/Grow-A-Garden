@@ -11,19 +11,14 @@ st.title("🌾 Seed Stock")
 
 try:
     with httpx.Client(timeout=10) as client:
-       data = client.get(API_URL).json()
-    
-    # Ensure data is a list
-    if isinstance(data, dict):
-        # If wrapped in dict, extract the list
-        # Try common key 'seeds', fallback to values
-        if "seeds" in data:
-            data = data["seeds"]
-        else:
-            data = list(data.values())
+    data = client.get(API_URL).json()
 
-    # Now safe to sort
+    # Keep only dicts to avoid errors
+    data = [x for x in data if isinstance(x, dict)]
+
+    # Sort according to SEED_ORDER
     data.sort(key=lambda x: SEED_ORDER.index(x["name"]) if x["name"] in SEED_ORDER else 999)
+
     for item in data:
         name = item["name"]
         qty = item.get("quantity", 0)
