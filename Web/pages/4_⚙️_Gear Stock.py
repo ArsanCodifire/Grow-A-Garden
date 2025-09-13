@@ -4,9 +4,9 @@ from rarity import rarity_data
 import os
 
 IMG_FOLDER = os.path.join(os.path.dirname(__file__), "..", "images")
-API_URL = "https://gagapi.onrender.com/seeds"
+API_URL = "https://gagapi.onrender.com/gear"
 
-st.title("🌾 Seed Stock")
+st.title("⚙️ Gear Stock")
 
 try:
     with httpx.Client(timeout=10) as client:
@@ -20,10 +20,10 @@ try:
         cols = st.columns([1, 3, 2, 2])
         with cols[0]:
             icon_path = os.path.join(IMG_FOLDER, rarity_icon) if rarity_icon else None
-            if icon_path and os.path.exists(icon_path):
-                st.image(icon_path, width=30)
-            else:
-                st.write("❌")
+if icon_path and os.path.exists(icon_path):
+    st.image(icon_path, width=30)
+else:
+    st.write("❌")  # or just skip
         with cols[1]:
             st.write(name)
         with cols[2]:
@@ -32,4 +32,4 @@ try:
             st.write(f"{sheckle_cost} Sheckles | Stock: {qty}")
 
 except Exception as e:
-    st.error(f"Failed to fetch Seed Stock: {e}")
+    st.error(f"Failed to fetch Gear Stock: {e}")
