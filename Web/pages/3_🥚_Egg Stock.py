@@ -3,7 +3,7 @@ import httpx
 from rarity import rarity_data
 import os
 
-IMG_FOLDER = "Web/images"
+IMG_FOLDER = os.path.join(os.path.dirname(__file__), "..", "images")
 API_URL = "https://gagapi.onrender.com/eggs"
 
 st.title("🥚 Egg Stock")
