@@ -21,10 +21,8 @@ try:
         with cols[0]:
             if rarity_icon:
                 icon_path = os.path.join(IMG_FOLDER, rarity_icon)
-                if os.path.isfile(icon_path):
-                    st.image(icon_path, width=30)
-                else:
-                    st.write("❓")
+                if os.path.exists(icon_path):
+                    st.image(icon_path, width=100)
         with cols[1]:
             st.write(name)
         with cols[2]:
