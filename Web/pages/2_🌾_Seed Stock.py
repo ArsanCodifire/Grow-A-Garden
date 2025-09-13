@@ -1,12 +1,25 @@
 import streamlit as st
 import httpx
-from rarity import rarity_data
 import os
+from rarity import rarity_data
 
-IMG_FOLDER = os.path.join(os.path.dirname(__file__), "..", "images")
-API_URL = "https://gagapi.onrender.com/gear"
+# Auto-detect images folder: first try Web/images, fallback to current folder
+BASE_DIR = os.path.dirname(__file__)
+IMG_FOLDERS = [
+    os.path.join(BASE_DIR, "..", "images"),  # original location
+    BASE_DIR,                               # fallback: inside pages/
+]
 
-st.title("⚙️ Gear Stock")
+def find_image(filename):
+    for folder in IMG_FOLDERS:
+        path = os.path.join(folder, filename)
+        if os.path.isfile(path):
+            return path
+    return None
+
+API_URL = "https://gagapi.onrender.com/seeds"
+
+st.title("🌾 Seed Stock")
 
 try:
     with httpx.Client(timeout=10) as client:
@@ -19,11 +32,12 @@ try:
 
         cols = st.columns([1, 3, 2, 2])
         with cols[0]:
-            icon_path = os.path.join(IMG_FOLDER, rarity_icon) if rarity_icon else None
-if icon_path and os.path.exists(icon_path):
-    st.image(icon_path, width=30)
-else:
-    st.write("❌")  # or just skip
+            if rarity_icon:
+                icon_path = find_image(rarity_icon)
+                if icon_path:
+                    st.image(icon_path, width=30)
+                else:
+                    st.write("❓")
         with cols[1]:
             st.write(name)
         with cols[2]:
@@ -32,4 +46,4 @@ else:
             st.write(f"{sheckle_cost} Sheckles | Stock: {qty}")
 
 except Exception as e:
-    st.error(f"Failed to fetch Gear Stock: {e}")
+    st.error(f"Failed to fetch Seed Stock: {e}")
