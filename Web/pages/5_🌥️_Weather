@@ -1,1 +1,17 @@
+import streamlit as st
+import httpx
 
+st.title("☀️ Weather")
+
+API_URL = "https://growagardenstock.vercel.app/api/weather"
+
+with httpx.Client(timeout=10) as client:
+    resp = client.get(API_URL)
+    weather = resp.json()
+
+st.markdown(f"**Weather:** {weather.get('icon', '')} {weather.get('currentWeather','Unknown')}")
+st.markdown(f"**Description:** {weather.get('description','')}")
+st.markdown(f"**Crop Bonuses:** {weather.get('cropBonuses','')}")
+st.markdown(f"**Mutations:** {', '.join(weather.get('mutations',[])) or 'None'}")
+st.markdown(f"**Rarity:** {weather.get('rarity','')}")
+st.markdown(f"**Last Updated:** {weather.get('last_updated','')}")
