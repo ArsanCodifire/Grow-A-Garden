@@ -1,22 +1,9 @@
 import streamlit as st
 import httpx
-import os
 from rarity import rarity_data
+import os
 
-# Auto-detect images folder: first try Web/images, fallback to current folder
-BASE_DIR = os.path.dirname(__file__)
-IMG_FOLDERS = [
-    os.path.join(BASE_DIR, "..", "images"),  # original location
-    BASE_DIR,                               # fallback: inside pages/
-]
-
-def find_image(filename):
-    for folder in IMG_FOLDERS:
-        path = os.path.join(folder, filename)
-        if os.path.isfile(path):
-            return path
-    return None
-
+IMG_FOLDER = os.path.join(os.path.dirname(__file__), "Images")
 API_URL = "https://gagapi.onrender.com/seeds"
 
 st.title("🌾 Seed Stock")
@@ -33,8 +20,8 @@ try:
         cols = st.columns([1, 3, 2, 2])
         with cols[0]:
             if rarity_icon:
-                icon_path = find_image(rarity_icon)
-                if icon_path:
+                icon_path = os.path.join(IMG_FOLDER, rarity_icon)
+                if os.path.isfile(icon_path):
                     st.image(icon_path, width=30)
                 else:
                     st.write("❓")
