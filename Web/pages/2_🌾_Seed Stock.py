@@ -13,28 +13,42 @@ try:
     with httpx.Client(timeout=10) as client:
         data = client.get(API_URL).json()
 
-    # Keep only dicts to avoid errors
+    # Ensure each element is a dict
+    if isinstance(data, dict):
+        data = [data]
     data = [x for x in data if isinstance(x, dict)]
 
     # Sort according to SEED_ORDER
-    data.sort(key=lambda x: SEED_ORDER.index(x["name"]) if x["name"] in SEED_ORDER else 999)
+    data.sort(key=lambda x: SEED_ORDER.index(x["name"]) if x.get("name") in SEED_ORDER else 999)
 
     for item in data:
-        name = item["name"]
+        name = item.get("name", "Unknown")
         qty = item.get("quantity", 0)
         rarity_name, rarity_icon, sheckle_cost = rarity_data.get(name, ("Unknown", None, 0))
 
         cols_top = st.columns([1, 4, 1])
         with cols_top[0]:
-            st.image(os.path.join(IMG_FOLDER, f"{name}.png"), width=40)
+            img_path = os.path.join(IMG_FOLDER, f"{name}.png")
+            if os.path.exists(img_path):
+                st.image(img_path, width=40)
         with cols_top[1]:
             st.write(name)
         with cols_top[2]:
             if rarity_icon:
-                st.image(os.path.join(IMG_FOLDER, rarity_icon), width=30)
+                icon_path = os.path.join(IMG_FOLDER, rarity_icon)
+                if os.path.exists(icon_path):
+                    st.image(icon_path, width=30)
 
         cols_bottom = st.columns([1, 1])
         with cols_bottom[0]:
+            st.write(f"Stock: {qty}")
+        with cols_bottom[1]:
+            st.write(f"Cost: {sheckle_cost} Sheckles")
+
+        st.markdown("---")
+
+except Exception as e:
+    st.error(f"Failed to fetch Seed Stock: {e}")        with cols_bottom[0]:
             st.write(f"Stock: {qty}")
         with cols_bottom[1]:
             st.write(f"Cost: {sheckle_cost} Sheckles")
