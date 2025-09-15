@@ -52,7 +52,7 @@ try:
             if rarity_icon:
                 rarity_img = os.path.join(IMG_FOLDER, rarity_icon)
                 if os.path.exists(rarity_img):
-                    st.image(rarity_img, width=30)
+                    st.image(rarity_img, width=100)
                 else:
                     st.write(rarity_name)
             else:
