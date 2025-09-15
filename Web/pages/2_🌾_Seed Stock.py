@@ -23,9 +23,6 @@ try:
 
     data = [x for x in data if isinstance(x, dict)]
 
-    # Debug: show cleaned data
-    st.subheader("Debug: Cleaned Data")
-    st.write(data)
 
     # Sort according to SEED_ORDER
     data.sort(key=lambda x: SEED_ORDER.index(x["name"]) if x["name"] in SEED_ORDER else 999)
