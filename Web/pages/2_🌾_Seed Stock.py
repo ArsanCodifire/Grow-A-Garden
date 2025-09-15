@@ -13,12 +13,27 @@ try:
     with httpx.Client(timeout=10) as client:
         data = client.get(API_URL).json()
 
-    # Keep only dicts and seeds in SEED_ORDER
-    data = [x for x in data if isinstance(x, dict) and x.get("name") in SEED_ORDER]
+    # Debug: show the raw API data
+    st.subheader("Debug: API Response")
+    st.write(data)
+
+    # Force data into a list of dicts
+    if isinstance(data, dict):
+        data = [data]
+    elif isinstance(data, str):
+        st.error("API returned a string, not JSON list/dict.")
+        st.stop()
+
+    data = [x for x in data if isinstance(x, dict)]
+
+    # Debug: show cleaned data
+    st.subheader("Debug: Cleaned Data")
+    st.write(data)
 
     # Sort according to SEED_ORDER
-    data.sort(key=lambda x: SEED_ORDER.index(x["name"]))
+    data.sort(key=lambda x: SEED_ORDER.index(x["name"]) if x["name"] in SEED_ORDER else 999)
 
+    # Render seeds
     for item in data:
         name = item.get("name", "Unknown")
         qty = item.get("quantity", 0)
