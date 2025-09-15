@@ -43,7 +43,7 @@ try:
         with cols_top[0]:
             seed_img = os.path.join(IMG_FOLDER, f"{name}.png")
             if os.path.exists(seed_img):
-                st.image(seed_img, width=40)
+                st.image(seed_img, width=100)
             else:
                 st.write("No Img")
         with cols_top[1]:
