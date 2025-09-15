@@ -13,9 +13,6 @@ try:
     with httpx.Client(timeout=10) as client:
         data = client.get(API_URL).json()
 
-    # Debug: show the raw API data
-    st.subheader("Debug: API Response")
-    st.write(data)
 
     # Force data into a list of dicts
     if isinstance(data, dict):
