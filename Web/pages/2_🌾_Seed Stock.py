@@ -11,13 +11,13 @@ st.title("🌾 Seed Stock")
 
 try:
     with httpx.Client(timeout=10) as client:
-        data = client.get(API_URL).json()  # Already a list of dicts
+        data = client.get(API_URL).json()
 
-    # Keep only dicts just in case
-    data = [x for x in data if isinstance(x, dict)]
+    # Keep only dicts and seeds in SEED_ORDER
+    data = [x for x in data if isinstance(x, dict) and x.get("name") in SEED_ORDER]
 
     # Sort according to SEED_ORDER
-    data.sort(key=lambda x: SEED_ORDER.index(x["name"]) if x["name"] in SEED_ORDER else 999)
+    data.sort(key=lambda x: SEED_ORDER.index(x["name"]))
 
     for item in data:
         name = item.get("name", "Unknown")
@@ -29,6 +29,8 @@ try:
             seed_img = os.path.join(IMG_FOLDER, f"{name}.png")
             if os.path.exists(seed_img):
                 st.image(seed_img, width=40)
+            else:
+                st.write("No Img")
         with cols_top[1]:
             st.write(name)
         with cols_top[2]:
@@ -36,6 +38,10 @@ try:
                 rarity_img = os.path.join(IMG_FOLDER, rarity_icon)
                 if os.path.exists(rarity_img):
                     st.image(rarity_img, width=30)
+                else:
+                    st.write(rarity_name)
+            else:
+                st.write(rarity_name)
 
         cols_bottom = st.columns([1, 1])
         with cols_bottom[0]:
