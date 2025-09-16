@@ -9,6 +9,26 @@ API_URL = "https://gagapi.onrender.com/gear"
 
 st.title("⚙️ Gear Stock")
 
+# A dictionary to map the item name to its actual image filename
+GEAR_IMAGE_MAP = {
+    "Watering Can": "Watering_Can.png",
+    "Trowel": "Trowel.png",
+    "Trading Ticket": "TradingTicket.png",
+    "Recall Wrench": "Recall_Wrench.png",
+    "Basic Sprinkler": "Basic_Sprinkler.png",
+    "Advanced Sprinkler": "Advanced_Sprinkler.png",
+    "Medium Treat": "MediumTreat.png",
+    "Medium Toy": "MediumToy.png",
+    "Godly Sprinkler": "Godly_Sprinkler.png",
+    "Master Sprinkler": "Master_Sprinkler.png",
+    "Cleaning Spray": "CleaningSpray.png",
+    "Favorite Tool": "Favorite_Tool.png",
+    "Harvest Tool": "Harvest_tool.png",
+    "Friendship Pot": "Friendship_Pot.png",
+    "Grandmaster Sprinkler": "GrandmasterSprinkler.png",
+    "Level Up Lollipop": "LevelUpLollipop.png"
+}
+
 try:
     with httpx.Client(timeout=10) as client:
         data = client.get(API_URL).json()
@@ -30,7 +50,10 @@ try:
 
         cols_top = st.columns([1, 4, 1])
         with cols_top[0]:
-            gear_img = os.path.join(IMG_FOLDER, f"{name}.png")
+            # Use the mapping dictionary to get the correct image filename
+            gear_img_filename = GEAR_IMAGE_MAP.get(name, f"{name}.png")
+            gear_img = os.path.join(IMG_FOLDER, gear_img_filename)
+
             if os.path.exists(gear_img):
                 st.image(gear_img, width=100, caption=" ")
             else:
