@@ -40,6 +40,7 @@ rarity_data = {
     # Gear
     "Watering Can": ("Rare", "RareIcon.png", 50000),
     "Trowel": ("Rare", "RareIcon.png", 100000),
+    "Trading Ticket": ("Uncommon", "UncommonIcon.png", 100000),
     "Recall Wrench": ("Rare", "RareIcon.png", 150000),
     "Basic Sprinkler": ("Common", "CommonTier.jpg", 25000),
     "Advanced Sprinkler": ("Uncommon", "UncommonIcon.png", 50000),
