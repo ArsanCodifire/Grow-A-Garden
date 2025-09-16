@@ -31,12 +31,11 @@ SEED_ORDER = [
 # Egg Order
 EGG_ORDER = [
     "Basic Egg",
-    "Advanced Egg",
-    "Godly Egg",
+    "Uncommon Egg",
+    "Rare Egg",
     "Legendary Egg",
     "Mythical Egg",
-    "Divine Egg",
-    "Prismatic Egg"
+    "Bug Egg"
 ]
 
 # Gear Order
