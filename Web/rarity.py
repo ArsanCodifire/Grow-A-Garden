@@ -54,4 +54,3 @@ rarity_data = {
     "Grandmaster Sprinkler": ("Prismatic", "PrismaticTier.gif", 1000000000),
     "Level Up Lollipop": ("Rare", "RareIcon.png", 10000000000),
 }
-}
