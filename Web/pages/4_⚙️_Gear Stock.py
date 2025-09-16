@@ -17,6 +17,7 @@ GEAR_IMAGE_MAP = {
     "Recall Wrench": "Recall_Wrench.png",
     "Basic Sprinkler": "Basic_Sprinkler.png",
     "Advanced Sprinkler": "Advanced_Sprinkler.png",
+    "Magnifying Glass":"Magnifying_Glass_Icon.png",
     "Medium Treat": "MediumTreat.png",
     "Medium Toy": "MediumToy.png",
     "Godly Sprinkler": "Godly_Sprinkler.png",
