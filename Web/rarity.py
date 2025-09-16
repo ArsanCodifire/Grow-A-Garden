@@ -24,17 +24,18 @@ rarity_data = {
     "Beanstalk": ("Prismatic", "PrismaticTier.gif", 10000000),
     "Ember Lily": ("Prismatic", "PrismaticTier.gif", 15000000),
     "Sugar Apple": ("Prismatic", "PrismaticTier.gif", 25000000),
-    "Burning Bud": ("Prismatic", "PrismaticTier.gif", 40000000),
+    "Burning Bud": ("Prismatic", "PrismaticTier.gif", 40000000), # Corrected cost
     "Giant Pinecone": ("Prismatic", "PrismaticTier.gif", 55000000),
     "Elder Strawberry": ("Prismatic", "PrismaticTier.gif", 70000000),
+    "Romanesco": ("Prismatic", "PrismaticTier.gif", 88000000), # Corrected cost
 
     # Eggs
-    "Common Egg": ("Common", "CommonTier.jpg", 0),
-    "Uncommon Egg": ("Uncommon", "UncommonIcon.png", 0),
-    "Rare Egg": ("Rare", "RareIcon.png", 0),
-    "Legendary Egg": ("Legendary", "LegendaryIcon.png", 0),
-    "Mythical Egg": ("Mythical", "Mythical_Icon.png", 0),
-    "Bug Egg": ("Special", "Divine.png", 0),
+    "Common Egg": ("Common", "CommonTier.jpg", 50000),
+    "Uncommon Egg": ("Uncommon", "UncommonIcon.png", 150000),
+    "Rare Egg": ("Rare", "RareIcon.png", 600000),
+    "Legendary Egg": ("Legendary", "LegendaryIcon.png", 3000000),
+    "Mythical Egg": ("Mythical", "Mythical_Icon.png", 8000000),
+    "Bug Egg": ("Special", "Divine.png", 50000000),
 
     # Gear
     "Watering Can": ("Rare", "RareIcon.png", 50000),
@@ -42,15 +43,15 @@ rarity_data = {
     "Recall Wrench": ("Rare", "RareIcon.png", 150000),
     "Basic Sprinkler": ("Common", "CommonTier.jpg", 25000),
     "Advanced Sprinkler": ("Uncommon", "UncommonIcon.png", 50000),
-    "Medium Treat": ("Uncommon", "UncommonIcon.png", 4000000),
-    "Medium Toy": ("Uncommon", "UncommonIcon.png", 4000000),
     "Godly Sprinkler": ("Rare", "RareIcon.png", 120000),
     "Master Sprinkler": ("Rare", "RareIcon.png", 10000000),
+    "Grandmaster Sprinkler": ("Prismatic", "PrismaticTier.gif", 1000000000),
     "Cleaning Spray": ("Uncommon", "UncommonIcon.png", 15000000),
     "Favorite Tool": ("Rare", "RareIcon.png", 20000000),
     "Harvest Tool": ("Rare", "RareIcon.png", 30000000),
     "Friendship Pot": ("Uncommon", "UncommonIcon.png", 15000000),
     "Magnifying Glass": ("Rare", "RareIcon.png", 10000000),
-    "Grandmaster Sprinkler": ("Prismatic", "PrismaticTier.gif", 1000000000),
+    "Medium Treat": ("Uncommon", "UncommonIcon.png", 4000000),
+    "Medium Toy": ("Uncommon", "UncommonIcon.png", 4000000),
     "Level Up Lollipop": ("Rare", "RareIcon.png", 10000000000),
 }
