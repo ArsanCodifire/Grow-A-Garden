@@ -4,8 +4,8 @@ import time
 from order import SEED_ORDER, EGG_ORDER, GEAR_ORDER
 
 # ---------------- Config ----------------
-ONE_SIGNAL_APP_ID = st.secrets("app_id")
-ONE_SIGNAL_API_KEY = st.secrets("api_key")
+ONE_SIGNAL_APP_ID = st.secrets["app_id"]
+ONE_SIGNAL_API_KEY = st.secrets["api_key"]
 CHECK_INTERVAL = 60
 API_URLS = {
     "Seeds": "https://gagapi.onrender.com/seeds",
