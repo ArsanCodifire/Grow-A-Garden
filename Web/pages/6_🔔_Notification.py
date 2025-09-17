@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import time
+import streamlit.components.v1 as components
 from order import SEED_ORDER, EGG_ORDER, GEAR_ORDER
 
 # ---------------- Config ----------------
@@ -17,6 +18,20 @@ ORDER_MAPPING = {
     "Gear": GEAR_ORDER,
     "Eggs": EGG_ORDER
 }
+
+# ---------------- OneSignal JS ----------------
+components.html(f"""
+<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+<script>
+  window.OneSignal = window.OneSignal || [];
+  OneSignal.push(function() {{
+    OneSignal.init({{
+      appId: "{ONE_SIGNAL_APP_ID}",
+      notifyButton: {{ enable: true }}
+    }});
+  }});
+</script>
+""", height=100)
 
 # ---------------- Helper Functions ----------------
 def get_stock(category):
@@ -41,7 +56,8 @@ def send_notification(item):
         "headings": {"en": "Grow A Garden: Stock Alert!"},
         "contents": {"en": f"{item} is in stock! Buy before it runs out!"}
     }
-    requests.post(url, json=payload, headers=headers)
+    response = requests.post(url, json=payload, headers=headers)
+    st.write("OneSignal API response:", response.status_code, response.text)
 
 # ---------------- Streamlit UI ----------------
 st.title("Grow A Garden: Stock Notifier")
