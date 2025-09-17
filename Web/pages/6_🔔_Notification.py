@@ -60,7 +60,7 @@ components.html(f"""
 
 # Step 2: Listen for token
 token = st.session_state.get("push_token")
-msg = st.experimental_get_query_params().get("msg", [""])[0]
+msg = st.query_params().get("msg", [""])[0]
 if msg:
     try:
         data = json.loads(msg)
