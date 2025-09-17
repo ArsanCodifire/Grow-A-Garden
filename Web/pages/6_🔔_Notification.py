@@ -6,8 +6,8 @@ import json
 from order import SEED_ORDER, EGG_ORDER, GEAR_ORDER
 
 # ---------------- Config ----------------
-APP_ID = st.secrets["ONESIGNAL_APP_ID"]
-API_KEY = st.secrets["ONESIGNAL_API_KEY"]
+APP_ID = st.secrets["app_id"]
+API_KEY = st.secrets["api_key"]
 
 API_URLS = {
     "Weather": "https://gagapi.onrender.com/weather",
