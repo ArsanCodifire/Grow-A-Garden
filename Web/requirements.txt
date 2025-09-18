@@ -1,5 +1,5 @@
 streamlit
-httpx
-pyrebase
-pycryptodome
-setuptools
+pyrebase4
+requests>=2.31.0
+urllib3>=2.0.4
+pycryptodome>=3.18.0
