@@ -1,5 +1,6 @@
 import streamlit as st
-import pyrebase
+import firebase_admin
+from firebase_admin import credentials, db
 import requests
 import time
 import uuid
@@ -28,15 +29,10 @@ CHECK_INTERVALS = {
 }
 
 # ---------------- Firebase Setup ----------------
-firebase_config = {
-    "apiKey": st.secrets["firebase"]["apiKey"],
-    "authDomain": st.secrets["firebase"]["authDomain"],
-    "databaseURL": st.secrets["firebase"]["databaseURL"],
-    "storageBucket": st.secrets["firebase"]["storageBucket"]
-}
-
-firebase = pyrebase.initialize_app(firebase_config)
-db = firebase.database()
+cred = credentials.Certificate("serviceAccountKey.json")  # download from Firebase console
+firebase_admin.initialize_app(cred, {
+    "databaseURL": st.secrets["firebase"]["databaseURL"]
+})
 
 # ---------------- User ID via URL ----------------
 query_params = st.experimental_get_query_params()
@@ -57,6 +53,10 @@ selected_items = st.multiselect("Select items to get notifications for", availab
 
 if "notified" not in st.session_state:
     st.session_state.notified = set()
+if "seen_notifications" not in st.session_state:
+    st.session_state.seen_notifications = set()
+
+notif_placeholder = st.empty()
 
 # ---------------- Stock Functions ----------------
 def get_stock(category):
@@ -73,13 +73,9 @@ def get_stock(category):
 
 def send_firebase_notification(category, item, user_id):
     path = f"notifications/{user_id}/{category}/{item}"
-    db.child(path).set({"message": f"{item} is now available!", "timestamp": int(time.time())})
+    db.reference(path).set({"message": f"{item} is now available!", "timestamp": int(time.time())})
 
 # ---------------- Real-Time Notifications ----------------
-notif_placeholder = st.empty()
-if "seen_notifications" not in st.session_state:
-    st.session_state.seen_notifications = set()
-
 if st.button("Activate Alerts"):
     st.info(f"Monitoring {category} for: {', '.join(selected_items)}")
     interval = CHECK_INTERVALS[category]
@@ -90,9 +86,9 @@ if st.button("Activate Alerts"):
             if stock.get(item, 0) > 0 and item not in st.session_state.notified:
                 send_firebase_notification(category, item, user_id)
                 st.session_state.notified.add(item)
-        
+
         # Display notifications live from Firebase
-        all_notifs = db.child(f"notifications/{user_id}").get().val() or {}
+        all_notifs = db.reference(f"notifications/{user_id}").get() or {}
         new_messages = []
         for cat, items in all_notifs.items():
             for itm, data in items.items():
