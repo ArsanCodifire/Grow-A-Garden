@@ -1,4 +1,5 @@
 import streamlit as st
+import json
 import firebase_admin
 from firebase_admin import credentials, db
 import requests
@@ -29,7 +30,11 @@ CHECK_INTERVALS = {
 }
 
 # ---------------- Firebase Setup ----------------
-cred = credentials.Certificate("serviceAccountKey.json")  # download from Firebase console
+#Load Firebase service account from secrets
+service_account_info = json.loads(st.secrets["firebase"]["serviceAccount"])
+cred = credentials.Certificate(service_account_info)
+
+# Initialize Firebase
 firebase_admin.initialize_app(cred, {
     "databaseURL": st.secrets["firebase"]["databaseURL"]
 })
