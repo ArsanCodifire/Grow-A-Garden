@@ -1,14 +1,11 @@
 import streamlit as st
-import streamlit.components.v1 as components
+import pyrebase
 import requests
 import time
-import json
+import uuid
 from order import SEED_ORDER, EGG_ORDER, GEAR_ORDER
 
 # ---------------- Config ----------------
-APP_ID = st.secrets["app_id"]
-API_KEY = st.secrets["api_key"]
-
 API_URLS = {
     "Weather": "https://gagapi.onrender.com/weather",
     "Gear": "https://gagapi.onrender.com/gear",
@@ -17,84 +14,51 @@ API_URLS = {
 }
 
 ORDER_MAPPING = {
-    "Weather": ["Rainy", "Sunny", "Stormy", "Windy", "Foggy"],  # example
+    "Weather": ["Rainy", "Sunny", "Stormy", "Windy", "Foggy"],
     "Gear": GEAR_ORDER,
     "Seeds": SEED_ORDER,
     "Eggs": EGG_ORDER
 }
 
 CHECK_INTERVALS = {
-    "Weather": 120,   # 2 min
-    "Gear": 300,      # 5 min
-    "Seeds": 300,     # 5 min
-    "Eggs": 1800      # 30 min
+    "Weather": 120,
+    "Gear": 300,
+    "Seeds": 300,
+    "Eggs": 1800
 }
 
-# ---------------- Streamlit UI ----------------
+# ---------------- Firebase Setup ----------------
+firebase_config = {
+    "apiKey": st.secrets["firebase"]["apiKey"],
+    "authDomain": st.secrets["firebase"]["authDomain"],
+    "databaseURL": st.secrets["firebase"]["databaseURL"],
+    "storageBucket": st.secrets["firebase"]["storageBucket"]
+}
+
+firebase = pyrebase.initialize_app(firebase_config)
+db = firebase.database()
+
+# ---------------- User ID via URL ----------------
+query_params = st.experimental_get_query_params()
+if "user_id" in query_params:
+    user_id = query_params["user_id"][0]
+else:
+    user_id = f"{uuid.uuid4()}_{int(time.time())}"
+    st.info(f"No user_id in URL. Use this link to keep your ID: ?user_id={user_id}")
+
 st.set_page_config(page_title="Grow A Garden Notifier", layout="centered")
 st.title("🌱 Grow A Garden – Notifications")
+st.write(f"Your anonymous user ID: {user_id}")
 
-# Step 1: Inject OneSignal SDK v16
-components.html(f"""
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(function(OneSignal) {{
-    OneSignal.init({{
-      appId: "{APP_ID}",
-      notifyButton: {{ enable: true }},
-    }});
+# ---------------- Streamlit UI ----------------
+category = st.selectbox("Select category", list(API_URLS.keys()))
+available_items = ORDER_MAPPING[category]
+selected_items = st.multiselect("Select items to get notifications for", available_items)
 
-    OneSignal.Notifications.addEventListener("permissionChange", function(e) {{
-      if (e.to === "granted") {{
-        OneSignal.User.PushSubscription.addEventListener("change", function(sub) {{
-          if (sub && sub.token) {{
-            window.parent.postMessage({{"token": sub.token}}, "*");
-          }}
-        }});
-      }}
-    }});
-  }});
-</script>
-""", height=0)
+if "notified" not in st.session_state:
+    st.session_state.notified = set()
 
-# Step 2: Listen for token
-token = st.session_state.get("push_token")
-msg = st.query_params.get("msg", "")
-if msg:
-    try:
-        data = json.loads(msg)
-        if "token" in data:
-            st.session_state["push_token"] = data["token"]
-            token = data["token"]
-    except:
-        pass
-
-# Step 3: Show subscription status
-if token:
-    st.success("✅ You are subscribed for notifications!")
-else:
-    st.warning("⚠️ Click 'Allow' when prompted to subscribe.")
-
-# Step 4: Register user in OneSignal
-if token:
-    external_id = "user_123"  # replace with your own system’s user ID
-    url = f"https://api.onesignal.com/apps/{APP_ID}/users"
-    payload = {
-        "identity": {"external_id": external_id},
-        "properties": {"tags": {"garden_level": "beginner"}},
-        "subscriptions": [
-            {"type": "Push", "token": token, "enabled": True}
-        ]
-    }
-    headers = {"Authorization": f"Basic {API_KEY}", "Content-Type": "application/json"}
-    res = requests.post(url, json=payload, headers=headers)
-    if res.status_code == 200:
-        st.success("🎉 User registered in OneSignal")
-    else:
-        st.error(f"❌ Error: {res.status_code} → {res.text}")
-
-# ---------------- Stock Monitor ----------------
+# ---------------- Stock Functions ----------------
 def get_stock(category):
     try:
         r = requests.get(API_URLS[category], headers={"accept": "application/json"})
@@ -102,39 +66,41 @@ def get_stock(category):
         data = r.json()
         if category == "Weather":
             return {item["name"]: 1 for item in data}
-        return {item["name"]: item["quantity"] for item in data}
+        return {item["name"]: item.get("quantity", 0) for item in data}
     except Exception as e:
         st.error(f"Error fetching {category} stock: {e}")
         return {}
 
-def send_notification(category, item, external_id):
-    url = f"https://api.onesignal.com/apps/{APP_ID}/notifications"
-    headers = {"Authorization": f"Basic {API_KEY}", "Content-Type": "application/json"}
-    payload = {
-        "app_id": APP_ID,
-        "include_aliases": {"external_id": [external_id]},
-        "headings": {"en": f"Grow A Garden: {category} Update!"},
-        "contents": {"en": f"{item} is now available!"}
-    }
-    res = requests.post(url, json=payload, headers=headers)
-    return res.status_code, res.text
+def send_firebase_notification(category, item, user_id):
+    path = f"notifications/{user_id}/{category}/{item}"
+    db.child(path).set({"message": f"{item} is now available!", "timestamp": int(time.time())})
 
-category = st.selectbox("Select category", list(API_URLS.keys()))
-available_items = ORDER_MAPPING[category]
-selected_items = st.multiselect("Select items to get notifications for", available_items)
+# ---------------- Real-Time Notifications ----------------
+notif_placeholder = st.empty()
+if "seen_notifications" not in st.session_state:
+    st.session_state.seen_notifications = set()
 
-if st.button("Activate Alerts") and token:
-    notified = set()
+if st.button("Activate Alerts"):
     st.info(f"Monitoring {category} for: {', '.join(selected_items)}")
     interval = CHECK_INTERVALS[category]
     while True:
+        # Fetch stock and send notifications
         stock = get_stock(category)
         for item in selected_items:
-            if stock.get(item, 0) > 0 and item not in notified:
-                code, txt = send_notification(category, item, external_id)
-                if code == 200:
-                    st.success(f"📢 Notification sent: {item}")
-                else:
-                    st.error(f"Error sending notification: {txt}")
-                notified.add(item)
+            if stock.get(item, 0) > 0 and item not in st.session_state.notified:
+                send_firebase_notification(category, item, user_id)
+                st.session_state.notified.add(item)
+        
+        # Display notifications live from Firebase
+        all_notifs = db.child(f"notifications/{user_id}").get().val() or {}
+        new_messages = []
+        for cat, items in all_notifs.items():
+            for itm, data in items.items():
+                msg_id = f"{cat}_{itm}"
+                if msg_id not in st.session_state.seen_notifications:
+                    new_messages.append(f"{cat} → {itm}: {data['message']}")
+                    st.session_state.seen_notifications.add(msg_id)
+        if new_messages:
+            notif_placeholder.write("\n".join(new_messages))
+
         time.sleep(interval)
