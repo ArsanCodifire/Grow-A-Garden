@@ -4,7 +4,7 @@ import os
 from order import SEED_ORDER
 from rarity import rarity_data
 
-IMG_FOLDER = os.path.join(os.path.dirname(file), "Images")
+IMG_FOLDER = os.path.join(os.path.dirname(__file__), "Images")
 API_URL = "https://gagapi.onrender.com/seeds"
 
 st.title("🌾 Seed Stock")
