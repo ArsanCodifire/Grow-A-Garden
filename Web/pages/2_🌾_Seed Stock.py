@@ -1,140 +1,63 @@
 import streamlit as st
-import streamlit.components.v1 as components
-import requests
-import time
-import json
-from order import SEED_ORDER, EGG_ORDER, GEAR_ORDER
+import httpx
+import os
+from order import SEED_ORDER
+from rarity import rarity_data
 
-# ---------------- Config ----------------
-APP_ID = st.secrets["app_id"]
-API_KEY = st.secrets["api_key"]
+IMG_FOLDER = os.path.join(os.path.dirname(file), "Images")
+API_URL = "https://gagapi.onrender.com/seeds"
 
-API_URLS = {
-    "Weather": "https://gagapi.onrender.com/weather",
-    "Gear": "https://gagapi.onrender.com/gear",
-    "Seeds": "https://gagapi.onrender.com/seeds",
-    "Eggs": "https://gagapi.onrender.com/eggs"
-}
+st.title("🌾 Seed Stock")
 
-ORDER_MAPPING = {
-    "Weather": ["Rainy", "Sunny", "Stormy", "Windy", "Foggy"],
-    "Gear": GEAR_ORDER,
-    "Seeds": SEED_ORDER,
-    "Eggs": EGG_ORDER
-}
+try:
+with httpx.Client(timeout=10) as client:
+data = client.get(API_URL).json()
 
-CHECK_INTERVALS = {
-    "Weather": 120,
-    "Gear": 300,
-    "Seeds": 300,
-    "Eggs": 1800
-}
+# Force data into a list of dicts  
+if isinstance(data, dict):  
+    data = [data]  
+elif isinstance(data, str):  
+    st.error("API returned a string, not JSON list/dict.")  
+    st.stop()  
 
-# ---------------- Streamlit UI ----------------
-st.set_page_config(page_title="Grow A Garden Notifier", layout="centered")
-st.title("🌱 Grow A Garden – Notifications")
+data = [x for x in data if isinstance(x, dict)]  
 
-# Step 1: Inject OneSignal SDK v16 with service workers
-components.html(f"""
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(function(OneSignal) {{
-    OneSignal.init({{
-      appId: "{APP_ID}",
-      notifyButton: {{ enable: true }},
-      serviceWorkerPath: "/OneSignalSDKWorker.js",
-      serviceWorkerUpdaterPath: "/OneSignalSDKUpdaterWorker.js",
-    }});
 
-    OneSignal.Notifications.addEventListener("permissionChange", function(e) {{
-      if (e.to === "granted") {{
-        OneSignal.User.PushSubscription.addEventListener("change", function(sub) {{
-          if(sub && sub.token){{
-            window.parent.postMessage({{ "token": sub.token }}, "*");
-          }}
-        }});
-      }}
-    }});
-  }});
-</script>
-""", height=0)
+# Sort according to SEED_ORDER  
+data.sort(key=lambda x: SEED_ORDER.index(x["name"]) if x["name"] in SEED_ORDER else 999)  
 
-# Step 2: Listen for token via query param
-token = st.session_state.get("push_token")
-msg = st.query_params.get("msg", "")
-if msg:
-    try:
-        data = json.loads(msg)
-        if "token" in data:
-            st.session_state["push_token"] = data["token"]
-            token = data["token"]
-    except:
-        pass
+# Render seeds  
+for item in data:  
+    name = item.get("name", "Unknown")  
+    qty = item.get("quantity", 0)  
+    rarity_name, rarity_icon, sheckle_cost = rarity_data.get(name, ("Unknown", None, 0))  
 
-# Step 3: Show subscription status
-if token:
-    st.success("✅ You are subscribed for notifications!")
-else:
-    st.warning("⚠️ Click 'Allow' when prompted to subscribe.")
+    cols_top = st.columns([1, 4, 1])  
+    with cols_top[0]:  
+        seed_img = os.path.join(IMG_FOLDER, f"{name}.png")  
+        if os.path.exists(seed_img):  
+            st.image(seed_img, width=100)  
+        else:  
+            st.write("No Img")  
+    with cols_top[1]:  
+        st.write(name)  
+    with cols_top[2]:  
+        if rarity_icon:  
+            rarity_img = os.path.join(IMG_FOLDER, rarity_icon)  
+            if os.path.exists(rarity_img):  
+                st.image(rarity_img, width=100)  
+            else:  
+                st.write(rarity_name)  
+        else:  
+            st.write(rarity_name)  
 
-# Step 4: Register user in OneSignal
-if token:
-    external_id = "user_123"  # replace with your system’s user ID
-    url = f"https://api.onesignal.com/apps/{APP_ID}/users"
-    payload = {
-        "identity": {"external_id": external_id},
-        "properties": {"tags": {"garden_level": "beginner"}},
-        "subscriptions": [{"type": "Push", "token": token, "enabled": True}]
-    }
-    headers = {"Authorization": f"Basic {API_KEY}", "Content-Type": "application/json"}
-    res = requests.post(url, json=payload, headers=headers)
-    if res.status_code == 200:
-        st.success("🎉 User registered in OneSignal")
-    else:
-        st.error(f"❌ Error: {res.status_code} → {res.text}")
+    cols_bottom = st.columns([1, 1])  
+    with cols_bottom[0]:  
+        st.write(f"Stock: {qty}")  
+    with cols_bottom[1]:  
+        st.write(f"Cost: {sheckle_cost} Sheckles")  
 
-# ---------------- Stock Monitor ----------------
-def get_stock(category):
-    try:
-        r = requests.get(API_URLS[category], headers={"accept": "application/json"})
-        r.raise_for_status()
-        data = r.json()
-        if category == "Weather":
-            return {item["name"]: 1 for item in data}
-        return {item["name"]: item["quantity"] for item in data}
-    except Exception as e:
-        st.error(f"Error fetching {category} stock: {e}")
-        return {}
+    st.markdown("---")
 
-def send_notification(category, item, external_id):
-    url = f"https://api.onesignal.com/apps/{APP_ID}/notifications"
-    headers = {"Authorization": f"Basic {API_KEY}", "Content-Type": "application/json"}
-    payload = {
-        "app_id": APP_ID,
-        "include_external_user_ids": [external_id],
-        "headings": {"en": f"Grow A Garden: {category} Update!"},
-        "contents": {"en": f"{item} is now available!"}
-    }
-    res = requests.post(url, json=payload, headers=headers)
-    return res.status_code, res.text
-
-category = st.selectbox("Select category", list(API_URLS.keys()))
-available_items = ORDER_MAPPING[category]
-selected_items = st.multiselect("Select items to get notifications for", available_items)
-
-if st.button("Activate Alerts") and token:
-    notified = set()
-    st.info(f"Monitoring {category} for: {', '.join(selected_items)}")
-    interval = CHECK_INTERVALS[category]
-    while True:
-        stock = get_stock(category)
-        for item in selected_items:
-            if stock.get(item, 0) > 0 and item not in notified:
-                code, txt = send_notification(category, item, external_id)
-                if code == 200:
-                    st.success(f"📢 Notification sent: {item}")
-                else:
-                    st.error(f"Error sending notification: {txt}")
-                notified.add(item)
-        time.sleep(interval)
+except Exception as e:
+st.error(f"Failed to fetch Seed Stock: {e}")
