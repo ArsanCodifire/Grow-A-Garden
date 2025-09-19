@@ -41,10 +41,8 @@ firebase_admin.initialize_app(cred, {
 })
 
 # ---------------- User ID via URL ----------------
-query_params = st.experimental_get_query_params()
-if "user_id" in query_params:
-    user_id = query_params["user_id"][0]
-else:
+user_id = st.query_params.get("user_id", [None])[0]
+
     user_id = f"{uuid.uuid4()}_{int(time.time())}"
     st.info(f"No user_id in URL. Use this link to keep your ID: ?user_id={user_id}")
 
