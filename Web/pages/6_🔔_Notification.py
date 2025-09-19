@@ -43,7 +43,7 @@ firebase_admin.initialize_app(cred, {
 # ---------------- User ID via URL ----------------
 user_id = st.query_params.get("user_id", [None])[0]
 
-    user_id = f"{uuid.uuid4()}_{int(time.time())}"
+user_id = f"{uuid.uuid4()}_{int(time.time())}"
     st.info(f"No user_id in URL. Use this link to keep your ID: ?user_id={user_id}")
 
 st.set_page_config(page_title="Grow A Garden Notifier", layout="centered")
