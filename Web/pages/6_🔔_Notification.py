@@ -3,9 +3,10 @@ import json
 import firebase_admin
 from firebase_admin import credentials, db
 import requests
-import time
 import uuid
 from order import SEED_ORDER, EGG_ORDER, GEAR_ORDER
+from streamlit_autorefresh import st_autorefresh
+import time
 
 # ---------------- Config ----------------
 API_URLS = {
@@ -75,26 +76,25 @@ def send_firebase_notification(category, item, user_id):
     path = f"notifications/{user_id}/{category}/{item}"
     db.reference(path).set({"message": f"{item} is now available!", "timestamp": int(time.time())})
 
-# ---------------- Real-Time Notifications ----------------
-if st.button("Activate Alerts"):
-    st.info(f"Monitoring {category} for: {', '.join(selected_items)}")
-    interval = CHECK_INTERVALS[category]
-    while True:
-        stock = get_stock(category)
-        for item in selected_items:
-            if stock.get(item, 0) > 0 and item not in st.session_state.notified:
-                send_firebase_notification(category, item, user_id)
-                st.session_state.notified.add(item)
+# ---------------- Auto-refresh ----------------
+refresh_interval = 5000  # milliseconds
+st_autorefresh(interval=refresh_interval, key="notif_refresh")
 
-        all_notifs = db.reference(f"notifications/{user_id}").get() or {}
-        new_messages = []
-        for cat, items in all_notifs.items():
-            for itm, data in items.items():
-                msg_id = f"{cat}_{itm}"
-                if msg_id not in st.session_state.seen_notifications:
-                    new_messages.append(f"{cat} → {itm}: {data['message']}")
-                    st.session_state.seen_notifications.add(msg_id)
-        if new_messages:
-            notif_placeholder.write("\n".join(new_messages))
+# ---------------- Notification Logic ----------------
+stock = get_stock(category)
+for item in selected_items:
+    if stock.get(item, 0) > 0 and item not in st.session_state.notified:
+        send_firebase_notification(category, item, user_id)
+        st.session_state.notified.add(item)
 
-        time.sleep(interval)
+all_notifs = db.reference(f"notifications/{user_id}").get() or {}
+new_messages = []
+for cat, items in all_notifs.items():
+    for itm, data in items.items():
+        msg_id = f"{cat}_{itm}"
+        if msg_id not in st.session_state.seen_notifications:
+            new_messages.append(f"{cat} → {itm}: {data['message']}")
+            st.session_state.seen_notifications.add(msg_id)
+
+if new_messages:
+    notif_placeholder.write("\n".join(new_messages))
