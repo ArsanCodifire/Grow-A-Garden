@@ -30,21 +30,18 @@ CHECK_INTERVALS = {
 }
 
 # ---------------- Firebase Setup ----------------
-# Load Firebase service account from secrets
 service_account_info = json.loads(st.secrets["firebase"]["serviceAccount"])
 service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
 cred = credentials.Certificate(service_account_info)
 
-# Initialize Firebase
-firebase_admin.initialize_app(cred, {
-    "databaseURL": st.secrets["firebase"]["databaseURL"]
-})
+if not firebase_admin._apps:
+    firebase_admin.initialize_app(cred, {"databaseURL": st.secrets["firebase"]["databaseURL"]})
 
 # ---------------- User ID via URL ----------------
 user_id = st.query_params.get("user_id", [None])[0]
-
-user_id = f"{uuid.uuid4()}_{int(time.time())}"
-st.info(f"No user_id in URL. Use this link to keep your ID: Your ID={user_id}")
+if not user_id:
+    user_id = f"{uuid.uuid4()}_{int(time.time())}"
+    st.info(f"No user_id in URL. Use this link to keep your ID: ?user_id={user_id}")
 
 st.set_page_config(page_title="Grow A Garden Notifier", layout="centered")
 st.title("🌱 Grow A Garden – Notifications")
@@ -84,14 +81,12 @@ if st.button("Activate Alerts"):
     st.info(f"Monitoring {category} for: {', '.join(selected_items)}")
     interval = CHECK_INTERVALS[category]
     while True:
-        # Fetch stock and send notifications
         stock = get_stock(category)
         for item in selected_items:
             if stock.get(item, 0) > 0 and item not in st.session_state.notified:
                 send_firebase_notification(category, item, user_id)
                 st.session_state.notified.add(item)
 
-        # Display notifications live from Firebase
         all_notifs = db.reference(f"notifications/{user_id}").get() or {}
         new_messages = []
         for cat, items in all_notifs.items():
