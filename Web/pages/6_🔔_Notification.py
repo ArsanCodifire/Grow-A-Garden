@@ -30,8 +30,9 @@ CHECK_INTERVALS = {
 }
 
 # ---------------- Firebase Setup ----------------
-#Load Firebase service account from secrets
+# Load Firebase service account from secrets
 service_account_info = json.loads(st.secrets["firebase"]["serviceAccount"])
+service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
 cred = credentials.Certificate(service_account_info)
 
 # Initialize Firebase
