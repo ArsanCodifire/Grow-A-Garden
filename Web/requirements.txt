@@ -1,5 +1,6 @@
 streamlit
 streamlit-autorefresh
+extra-streamlit-components
 firebase-admin
 httpx
 urllib3
