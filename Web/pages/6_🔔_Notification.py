@@ -120,7 +120,7 @@ if st.button("Check Notifications"):
     if new_messages:
         notif_placeholder.write("\n".join(new_messages))
 
-firebase_web_config = st.secrets["firebase"]
+firebase_web_config = st.secrets["firebase_web"]
 
 st.html(f"""
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
