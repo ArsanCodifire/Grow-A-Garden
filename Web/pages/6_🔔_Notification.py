@@ -11,21 +11,18 @@ import time
 
 # ---------------- Config ----------------
 API_URLS = {
-    "Weather": "https://gagapi.onrender.com/weather",
     "Gear": "https://gagapi.onrender.com/gear",
     "Seeds": "https://gagapi.onrender.com/seeds",
     "Eggs": "https://gagapi.onrender.com/eggs"
 }
 
 ORDER_MAPPING = {
-    "Weather": ["Rainy", "Sunny", "Stormy", "Windy", "Foggy"],
     "Gear": GEAR_ORDER,
     "Seeds": SEED_ORDER,
     "Eggs": EGG_ORDER
 }
 
 CHECK_INTERVALS = {
-    "Weather": 120,
     "Gear": 300,
     "Seeds": 300,
     "Eggs": 1800
