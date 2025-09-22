@@ -65,10 +65,11 @@ notif_placeholder = st.empty()
 # ---------------- Stock Functions ----------------
 def get_stock(category):
     try:
-        r = requests.get(API_URLS[category], headers={"accept": "application/json"})
-        r.raise_for_status()
-        data = r.json()
-        return {item["name"]: item.get("quantity", 0) for item in data}
+        with httpx.Client(timeout=10.0) as client:
+            r = client.get(API_URLS[category], headers={"accept": "application/json"})
+            r.raise_for_status()
+            data = r.json()
+            return {item["name"]: item.get("quantity", 0) for item in data}
     except Exception as e:
         st.error(f"Error fetching {category} stock: {e}")
         return {}
