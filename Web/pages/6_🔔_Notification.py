@@ -6,6 +6,7 @@ from firebase_admin import credentials, db, messaging
 import httpx
 import uuid
 import extra_streamlit_components as stx
+import streamlit.components.v1 as components
 from order import SEED_ORDER, EGG_ORDER, GEAR_ORDER
 
 # ---------------- Config ----------------
@@ -122,7 +123,7 @@ if st.button("Check Notifications"):
 
 firebase_web_config = st.secrets["firebase_web"]
 
-st.html(f"""
+components.html(f"""
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
 <script>
