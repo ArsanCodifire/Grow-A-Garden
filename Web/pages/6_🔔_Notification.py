@@ -5,7 +5,7 @@ from firebase_admin import credentials, db
 import requests
 import uuid
 from order import SEED_ORDER, EGG_ORDER, GEAR_ORDER
-from streamlit_autorefresh import st_autorefresh
+import extra_streamlit_components as stx
 import time
 
 # ---------------- Config ----------------
@@ -38,14 +38,19 @@ cred = credentials.Certificate(service_account_info)
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred, {"databaseURL": st.secrets["firebase"]["databaseURL"]})
 
-# ---------------- User ID via URL ----------------
-user_id = st.query_params.get("user_id", [None])[0]
+# ---------------- Cookie Manager ----------------
+cookie_manager = stx.CookieManager()
+
+# Get or create persistent user_id
+user_id = cookie_manager.get("user_id")
 if not user_id:
     user_id = f"{uuid.uuid4()}_{int(time.time())}"
+    cookie_manager.set("user_id", user_id, key="set_user_id")
 
+# ---------------- Streamlit Setup ----------------
 st.set_page_config(page_title="Grow A Garden Notifier", layout="centered")
 st.title("🌱 Grow A Garden – Notifications")
-st.write(f"Your anonymous user ID: {user_id}")
+st.write(f"Your persistent user ID: {user_id}")
 
 # ---------------- Streamlit UI ----------------
 category = st.selectbox("Select category", list(API_URLS.keys()))
