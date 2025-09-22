@@ -1,3 +1,4 @@
+
 import streamlit as st
 import json
 import time
@@ -14,7 +15,6 @@ API_URLS = {
     "Seeds": "https://gagapi.onrender.com/seeds",
     "Eggs": "https://gagapi.onrender.com/eggs"
 }
-
 ORDER_MAPPING = {
     "Gear": GEAR_ORDER,
     "Seeds": SEED_ORDER,
@@ -31,8 +31,6 @@ if not firebase_admin._apps:
 
 # ---------------- Cookie Manager ----------------
 cookie_manager = stx.CookieManager()
-
-# Ensure persistent user_id
 if "user_id" not in st.session_state:
     stored_id = cookie_manager.get("user_id")
     if stored_id:
@@ -40,7 +38,6 @@ if "user_id" not in st.session_state:
     else:
         st.session_state.user_id = f"{uuid.uuid4()}_{int(time.time())}"
         cookie_manager.set("user_id", st.session_state.user_id, key="set_user_id")
-
 user_id = st.session_state.user_id
 
 # ---------------- Streamlit Setup ----------------
@@ -71,15 +68,18 @@ def get_stock(category):
         st.error(f"Error fetching {category} stock: {e}")
         return {}
 
-def send_firebase_notification(category, item, user_id):
+def send_notification(category, item, user_id):
     stock = get_stock(category)
-    message_text = f"{item} is in stock! Amount: {stock.get(item, 0)}"
-    # Store in Firebase Realtime Database
+    amount = stock.get(item, 0)
+    message_text = f"{item} is in stock! Amount: {amount}"
+
+    # Store in Firebase
     db.reference(f"notifications/{user_id}/{category}/{item}").set({
         "message": message_text,
         "timestamp": int(time.time())
     })
-    # Send FCM push to all registered device tokens for this user
+
+    # Push FCM notifications
     tokens = db.reference(f"user_tokens/{user_id}").get() or []
     for token in tokens:
         try:
@@ -93,12 +93,15 @@ def send_firebase_notification(category, item, user_id):
         except Exception as e:
             print("FCM error:", e)
 
+    # Browser toast fallback
+    stx.toast(message_text)
+
 # ---------------- Notification Button ----------------
 if st.button("Check Notifications"):
     stock = get_stock(category)
     for item in selected_items:
         if stock.get(item, 0) > 0 and item not in st.session_state.notified:
-            send_firebase_notification(category, item, user_id)
+            send_notification(category, item, user_id)
             st.session_state.notified.add(item)
 
     # Display notifications from Firebase
