@@ -1,12 +1,11 @@
 import streamlit as st
 import json
 import firebase_admin
-from firebase_admin import credentials, db
+from firebase_admin import credentials, db, messaging
 import requests
 import uuid
 from order import SEED_ORDER, EGG_ORDER, GEAR_ORDER
 import extra_streamlit_components as stx
-import time
 
 # ---------------- Config ----------------
 API_URLS = {
@@ -32,7 +31,7 @@ if not firebase_admin._apps:
 # ---------------- Cookie Manager ----------------
 cookie_manager = stx.CookieManager()
 
-# Ensure persistent user_id immediately
+# Ensure persistent user_id
 if "user_id" not in st.session_state:
     stored_id = cookie_manager.get("user_id")
     if stored_id:
@@ -72,8 +71,26 @@ def get_stock(category):
         return {}
 
 def send_firebase_notification(category, item, user_id):
-    path = f"notifications/{user_id}/{category}/{item}"
-    db.reference(path).set({"message": f"{item} is in stock! Amount: {get_stock(category)[item]}", "timestamp": int(time.time())})
+    stock = get_stock(category)
+    message_text = f"{item} is in stock! Amount: {stock.get(item, 0)}"
+    # Store in Firebase Realtime Database
+    db.reference(f"notifications/{user_id}/{category}/{item}").set({
+        "message": message_text,
+        "timestamp": int(time.time())
+    })
+    # Send FCM push to all registered device tokens for this user
+    tokens = db.reference(f"user_tokens/{user_id}").get() or []
+    for token in tokens:
+        try:
+            messaging.send(messaging.Message(
+                notification=messaging.Notification(
+                    title=f"{item} in Stock!",
+                    body=message_text
+                ),
+                token=token
+            ))
+        except Exception as e:
+            print("FCM error:", e)
 
 # ---------------- Notification Button ----------------
 if st.button("Check Notifications"):
@@ -83,6 +100,7 @@ if st.button("Check Notifications"):
             send_firebase_notification(category, item, user_id)
             st.session_state.notified.add(item)
 
+    # Display notifications from Firebase
     all_notifs = db.reference(f"notifications/{user_id}").get() or {}
     new_messages = []
     for cat, items in all_notifs.items():
