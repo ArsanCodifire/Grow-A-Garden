@@ -152,6 +152,7 @@ async function registerToken() {{
         await Notification.requestPermission();
         const token = await messaging.getToken({{ vapidKey: "{firebase_web_config['vapidKey']}" }});
         if(token){{
+            // Redirect to Streamlit with token as query param
             const currentUrl = window.location.href.split('?')[0];
             window.location.href = currentUrl + '?token=' + token;
         }}
