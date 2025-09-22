@@ -85,7 +85,7 @@ if st.button("Activate Alerts"):
     st.session_state.alerts_active = True
 
 if st.session_state.get("alerts_active"):
-st_autorefresh(interval=refresh_interval, key="notif_refresh")
+    st_autorefresh(interval=refresh_interval, key="notif_refresh")
 
 # ---------------- Notification Logic ----------------
 stock = get_stock(category)
