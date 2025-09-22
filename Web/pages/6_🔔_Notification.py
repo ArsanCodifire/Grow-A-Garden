@@ -93,7 +93,7 @@ def send_notification(category, item, user_id):
             print("FCM error:", e)
 
     # Browser toast fallback
-    stx.toast(message_text)
+    st.toast(message_text)
 
 # ---------------- Notification Button ----------------
 if st.button("Check Notifications"):
