@@ -3,7 +3,7 @@ import json
 import time
 import firebase_admin
 from firebase_admin import credentials, db, messaging
-import requests
+import httpx
 import uuid
 import extra_streamlit_components as stx
 from order import SEED_ORDER, EGG_ORDER, GEAR_ORDER
