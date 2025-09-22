@@ -39,7 +39,7 @@ if "user_id" not in st.session_state:
 user_id = st.session_state.user_id
 
 # ---------------- Handle token from query param ----------------
-query_params = st.experimental_get_query_params()
+query_params = st.query_params()
 if "token" in query_params:
     token = query_params["token"][0]
     db.reference(f"user_tokens/{user_id}/{token}").set(int(time.time()))
@@ -120,7 +120,7 @@ if st.button("Check Notifications"):
     if new_messages:
         notif_placeholder.write("\n".join(new_messages))
 
-firebase_web_config = st.secrets["firebase"]["webApp"]
+firebase_web_config = st.secrets["firebase"]
 
 st.html(f"""
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
