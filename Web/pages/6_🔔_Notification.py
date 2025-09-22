@@ -81,6 +81,10 @@ def send_firebase_notification(category, item, user_id):
 
 # ---------------- Auto-refresh ----------------
 refresh_interval = 20000 # milliseconds
+if st.button("Activate Alerts"):
+    st.session_state.alerts_active = True
+
+if st.session_state.get("alerts_active"):
 st_autorefresh(interval=refresh_interval, key="notif_refresh")
 
 # ---------------- Notification Logic ----------------
