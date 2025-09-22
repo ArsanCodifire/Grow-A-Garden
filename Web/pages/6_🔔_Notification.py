@@ -5,8 +5,8 @@ import firebase_admin
 from firebase_admin import credentials, db, messaging
 import requests
 import uuid
-from order import SEED_ORDER, EGG_ORDER, GEAR_ORDER
 import extra_streamlit_components as stx
+from order import SEED_ORDER, EGG_ORDER, GEAR_ORDER
 
 # ---------------- Config ----------------
 API_URLS = {
@@ -20,15 +20,14 @@ ORDER_MAPPING = {
     "Eggs": EGG_ORDER
 }
 
-# ---------------- Firebase Setup ----------------
+# ---------------- Firebase Admin Setup ----------------
 service_account_info = json.loads(st.secrets["firebase"]["serviceAccount"])
 service_account_info["private_key"] = service_account_info["private_key"].replace("\\n", "\n")
 cred = credentials.Certificate(service_account_info)
-
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred, {"databaseURL": st.secrets["firebase"]["databaseURL"]})
 
-# ---------------- Cookie Manager ----------------
+# ---------------- Cookie / User ----------------
 cookie_manager = stx.CookieManager()
 if "user_id" not in st.session_state:
     stored_id = cookie_manager.get("user_id")
@@ -38,6 +37,12 @@ if "user_id" not in st.session_state:
         st.session_state.user_id = f"{uuid.uuid4()}_{int(time.time())}"
         cookie_manager.set("user_id", st.session_state.user_id, key="set_user_id")
 user_id = st.session_state.user_id
+
+# ---------------- Handle token from query param ----------------
+query_params = st.experimental_get_query_params()
+if "token" in query_params:
+    token = query_params["token"][0]
+    db.reference(f"user_tokens/{user_id}/{token}").set(int(time.time()))
 
 # ---------------- Streamlit Setup ----------------
 st.set_page_config(page_title="Grow A Garden Notifier", layout="centered")
@@ -79,8 +84,8 @@ def send_notification(category, item, user_id):
     })
 
     # Push FCM notifications
-    tokens = db.reference(f"user_tokens/{user_id}").get() or []
-    for token in tokens:
+    tokens = db.reference(f"user_tokens/{user_id}").get() or {}
+    for token in tokens.keys():
         try:
             messaging.send(messaging.Message(
                 notification=messaging.Notification(
@@ -114,3 +119,39 @@ if st.button("Check Notifications"):
                 st.session_state.seen_notifications.add(msg_id)
     if new_messages:
         notif_placeholder.write("\n".join(new_messages))
+
+firebase_web_config = st.secrets["firebase"]["webApp"]
+
+st.html(f"""
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+<script>
+const firebaseConfig = {{
+    apiKey: "{firebase_web_config['apiKey']}",
+    authDomain: "{firebase_web_config['authDomain']}",
+    projectId: "{firebase_web_config['projectId']}",
+    storageBucket: "{firebase_web_config['storageBucket']}",
+    messagingSenderId: "{firebase_web_config['messagingSenderId']}",
+    appId: "{firebase_web_config['appId']}",
+    measurementId: "{firebase_web_config['measurementId']}"
+}};
+
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+
+async function registerToken() {{
+    try {{
+        await Notification.requestPermission();
+        const token = await messaging.getToken({{ vapidKey: "{firebase_web_config['vapidKey']}" }});
+        if(token){{
+            // Redirect to Streamlit with token as query param
+            const currentUrl = window.location.href.split('?')[0];
+            window.location.href = currentUrl + '?token=' + token;
+        }}
+    }} catch(e) {{
+        console.log(e);
+    }}
+}}
+registerToken();
+</script>
+""", height=0)
