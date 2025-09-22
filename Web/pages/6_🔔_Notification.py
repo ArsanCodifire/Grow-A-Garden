@@ -32,10 +32,16 @@ if not firebase_admin._apps:
 # ---------------- Cookie Manager ----------------
 cookie_manager = stx.CookieManager()
 
-user_id = cookie_manager.get("user_id")
-if not user_id:
-    user_id = f"{uuid.uuid4()}_{int(time.time())}"
-    cookie_manager.set("user_id", user_id, key="set_user_id")
+# Ensure persistent user_id immediately
+if "user_id" not in st.session_state:
+    stored_id = cookie_manager.get("user_id")
+    if stored_id:
+        st.session_state.user_id = stored_id
+    else:
+        st.session_state.user_id = f"{uuid.uuid4()}_{int(time.time())}"
+        cookie_manager.set("user_id", st.session_state.user_id, key="set_user_id")
+
+user_id = st.session_state.user_id
 
 # ---------------- Streamlit Setup ----------------
 st.set_page_config(page_title="Grow A Garden Notifier", layout="centered")
@@ -67,18 +73,16 @@ def get_stock(category):
 
 def send_firebase_notification(category, item, user_id):
     path = f"notifications/{user_id}/{category}/{item}"
-    db.reference(path).set({"message": f"{item} is now available!", "timestamp": int(time.time())})
+    db.reference(path).set({"message": f"{item} is in stock! Amount: {get_stock(category)[item]}", "timestamp": int(time.time())})
 
 # ---------------- Notification Button ----------------
 if st.button("Check Notifications"):
-    # Fetch stock and send notifications
     stock = get_stock(category)
     for item in selected_items:
         if stock.get(item, 0) > 0 and item not in st.session_state.notified:
             send_firebase_notification(category, item, user_id)
             st.session_state.notified.add(item)
 
-    # Display notifications from Firebase
     all_notifs = db.reference(f"notifications/{user_id}").get() or {}
     new_messages = []
     for cat, items in all_notifs.items():
