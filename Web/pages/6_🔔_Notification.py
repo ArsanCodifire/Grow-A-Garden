@@ -65,13 +65,18 @@ notif_placeholder = st.empty()
 # ---------------- Stock Functions ----------------
 def get_stock(category):
     try:
-        with httpx.Client(timeout=10.0) as client:
-            r = client.get(API_URLS[category], headers={"accept": "application/json"})
-            r.raise_for_status()
-            data = r.json()
-            return {item["name"]: item.get("quantity", 0) for item in data}
+        r = httpx.get(API_URLS[category], headers={"accept": "application/json"}, timeout=10.0)
+        r.raise_for_status()
+        data = r.json()
+        return {item["name"]: item.get("quantity", 0) for item in data}
+    except httpx.RequestError as e:
+        st.error(f"Network error while fetching {category} stock: {e}")
+        return {}
+    except httpx.HTTPStatusError as e:
+        st.error(f"HTTP error while fetching {category} stock: {e}")
+        return {}
     except Exception as e:
-        st.error(f"Error fetching {category} stock: {e}")
+        st.error(f"Unexpected error: {e}")
         return {}
 
 def send_notification(category, item, user_id):
