@@ -39,7 +39,7 @@ if "user_id" not in st.session_state:
 user_id = st.session_state.user_id
 
 # ---------------- Handle token from query param ----------------
-query_params = st.query_params()
+query_params = st.query_params
 if "token" in query_params:
     token = query_params["token"][0]
     db.reference(f"user_tokens/{user_id}/{token}").set(int(time.time()))
