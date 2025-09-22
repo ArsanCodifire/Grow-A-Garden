@@ -35,7 +35,8 @@ if "user_id" not in st.session_state:
     if stored_id:
         st.session_state.user_id = stored_id
     else:
-        st.session_state.user_id = f"{uuid.uuid4()}_{int(time.time())}"
+        # persistent user ID, will not change
+        st.session_state.user_id = f"{uuid.uuid4()}"
         cookie_manager.set("user_id", st.session_state.user_id, key="set_user_id")
 user_id = st.session_state.user_id
 
@@ -55,6 +56,10 @@ category = st.selectbox("Select category", list(API_URLS.keys()))
 available_items = ORDER_MAPPING[category]
 selected_items = st.multiselect("Select items to get notifications for", available_items)
 
+# Save subscriptions to Firebase
+for item in selected_items:
+    db.reference(f"user_subscriptions/{user_id}/{category}/{item}").set(int(time.time()))
+
 if "notified" not in st.session_state:
     st.session_state.notified = set()
 if "seen_notifications" not in st.session_state:
@@ -69,53 +74,48 @@ def get_stock(category):
         r.raise_for_status()
         data = r.json()
         return {item["name"]: item.get("quantity", 0) for item in data}
-    except httpx.RequestError as e:
-        st.error(f"Network error while fetching {category} stock: {e}")
-        return {}
-    except httpx.HTTPStatusError as e:
-        st.error(f"HTTP error while fetching {category} stock: {e}")
-        return {}
     except Exception as e:
-        st.error(f"Unexpected error: {e}")
+        st.error(f"Error fetching {category} stock: {e}")
         return {}
 
-def send_notification(category, item, user_id):
-    stock = get_stock(category)
-    amount = stock.get(item, 0)
-    message_text = f"{item} is in stock! Amount: {amount}"
-
-    # Store in Firebase
-    db.reference(f"notifications/{user_id}/{category}/{item}").set({
-        "message": message_text,
-        "timestamp": int(time.time())
-    })
-
-    # Push FCM notifications
-    tokens = db.reference(f"user_tokens/{user_id}").get() or {}
-    for token in tokens.keys():
-        try:
-            messaging.send(messaging.Message(
-                notification=messaging.Notification(
-                    title=f"{item} in Stock!",
-                    body=message_text
-                ),
-                token=token
-            ))
-        except Exception as e:
-            print("FCM error:", e)
-
-    # Browser toast fallback
-    st.toast(message_text)
+def send_notification(category, item):
+    message_text = f"{item} is in stock!"
+    
+    # Fetch all users subscribed to this item
+    all_subs = db.reference("user_subscriptions").get() or {}
+    for u_id, cats in all_subs.items():
+        if category in cats and item in cats[category]:
+            # Store notification
+            db.reference(f"notifications/{u_id}/{category}/{item}").set({
+                "message": message_text,
+                "timestamp": int(time.time())
+            })
+            # Send FCM
+            tokens = db.reference(f"user_tokens/{u_id}").get() or {}
+            for t in tokens.keys():
+                try:
+                    messaging.send(messaging.Message(
+                        notification=messaging.Notification(
+                            title=f"{item} in Stock!",
+                            body=message_text
+                        ),
+                        token=t
+                    ))
+                except Exception as e:
+                    print("FCM error:", e)
+            # Browser toast if this is the current user
+            if u_id == user_id:
+                st.toast(message_text)
 
 # ---------------- Notification Button ----------------
 if st.button("Check Notifications"):
     stock = get_stock(category)
     for item in selected_items:
         if stock.get(item, 0) > 0 and item not in st.session_state.notified:
-            send_notification(category, item, user_id)
+            send_notification(category, item)
             st.session_state.notified.add(item)
 
-    # Display notifications from Firebase
+    # Display notifications for current user
     all_notifs = db.reference(f"notifications/{user_id}").get() or {}
     new_messages = []
     for cat, items in all_notifs.items():
@@ -127,6 +127,7 @@ if st.button("Check Notifications"):
     if new_messages:
         notif_placeholder.write("\n".join(new_messages))
 
+# ---------------- Firebase Web Push ----------------
 firebase_web_config = st.secrets["firebase_web"]
 
 components.html(f"""
@@ -151,7 +152,6 @@ async function registerToken() {{
         await Notification.requestPermission();
         const token = await messaging.getToken({{ vapidKey: "{firebase_web_config['vapidKey']}" }});
         if(token){{
-            // Redirect to Streamlit with token as query param
             const currentUrl = window.location.href.split('?')[0];
             window.location.href = currentUrl + '?token=' + token;
         }}
