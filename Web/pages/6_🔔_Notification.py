@@ -80,7 +80,7 @@ def send_firebase_notification(category, item, user_id):
     db.reference(path).set({"message": f"{item} is now available!", "timestamp": int(time.time())})
 
 # ---------------- Auto-refresh ----------------
-refresh_interval = 5000  # milliseconds
+refresh_interval = 20000 # milliseconds
 st_autorefresh(interval=refresh_interval, key="notif_refresh")
 
 # ---------------- Notification Logic ----------------
