@@ -1,0 +1,20 @@
+import streamlit as st
+import httpx
+
+st.title("☀️ Weather")
+
+API_URL = "https://growagardenstock.vercel.app/api/weather"
+
+with httpx.Client(timeout=10) as client:
+    resp = client.get(API_URL)
+    weather = resp.json()
+
+st.subheader(f"{weather.get('icon', '')} {weather.get('currentWeather', 'Unknown')}")
+st.write(weather.get("description", "No description available"))
+st.write(f"Effect on crops: {weather.get('cropBonuses', 'Standard')}")
+st.write(f"Rarity: {weather.get('rarity', 'Unknown')}")
+st.write(f"Last updated: {weather.get('last_updated', 'Unknown')}")
+if weather.get("mutations"):
+    st.write("Mutations available:")
+    for m in weather["mutations"]:
+        st.write(f"- {m}")

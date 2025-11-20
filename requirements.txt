@@ -1,0 +1,4 @@
+streamlit
+streamlit-plugins
+firebase-admin
+httpx
