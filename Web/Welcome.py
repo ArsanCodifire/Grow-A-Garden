@@ -4,7 +4,7 @@ import streamlit as st
 from streamlit_plugins.components.theme_changer import st_theme_changer
 from streamlit_plugins.components.theme_changer.entity import ThemeInfo, ThemeInput, ThemeBaseLight, ThemeBaseDark
 
-# --- Theme Definitions (Only 3 Core Themes) ---
+# --- Theme Definitions (Only 2 Core Themes) ---
 
 # Garden Oasis (Light)
 garden_light_theme = ThemeInput(
@@ -48,7 +48,7 @@ theme_data = st.session_state["theme_data"]
 st_theme_changer(
     themes_data=theme_data, 
     render_mode="init", 
-    default_init_theme_name="system_default_theme", 
+    default_init_theme_name="garden_dark_theme", 
     key="theme_init"
 )
 
