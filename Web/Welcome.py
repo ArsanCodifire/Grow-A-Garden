@@ -14,7 +14,8 @@ garden_light_theme = ThemeInput(
     themeInfo=ThemeInfo(
         base=ThemeBaseLight.base, primaryColor="#388E3C", backgroundColor="#F9FFF5", 
         secondaryBackgroundColor="#E8F5E9", textColor="#000000", widgetBackgroundColor="#FFFFFF",
-        widgetBorderColor="#81C784", skeletonBackgroundColor="#C8E6C9",
+        widgetBorderColor="#81C784", skeletonBackgroundColor="#C8E6C9", bodyFont=ThemeBaseLight.bodyFont,
+        codeFont=ThemeBaseLight.codeFont, fontFaces=ThemeBaseLight.fontFaces
     )
 )
 
@@ -26,7 +27,8 @@ garden_dark_theme = ThemeInput(
     themeInfo=ThemeInfo(
         base=ThemeBaseDark.base, primaryColor="#8BC34A", backgroundColor="#1C301C", 
         secondaryBackgroundColor="#2E482E", textColor="#E8F5E9", widgetBackgroundColor="#3A573A", 
-        widgetBorderColor="#A5D6A7", skeletonBackgroundColor="#556B55",
+        widgetBorderColor="#A5D6A7", skeletonBackgroundColor="#556B55", bodyFont=ThemeBaseDark.bodyFont,
+        codeFont=ThemeBaseDark.codeFont, fontFaces=ThemeBaseDark.fontFaces
     )
 )
 
