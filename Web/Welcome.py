@@ -163,8 +163,8 @@ def render_settings_dialog():
     # --- Theme Editor UI (The "Notepad" for all 53 themes) ---
     # This section contains the full "notepad" editor functionality
     with st.expander("🛠️ Custom Theme Maker (50+ Themes)", expanded=False):
-        st.info("This is your theme 'notepad'. All 53 defined themes are here. Select a tab to edit and save its properties.")
+        st.info("This are your extra themes. All 53 defined themes are here. Select a tab to edit and save its properties.")
         
         with st.container(border=False):
             # Sort themes by order for consistent tab display
-            theme_keys = sorted(theme_data.keys(), key=lambda k: theme_data[k])
+            theme_keys = sorted(theme_data.keys(), key=lambda k: theme_data[k]
