@@ -167,4 +167,4 @@ def render_settings_dialog():
         
         with st.container(border=False):
             # Sort themes by order for consistent tab display
-            theme_keys = sorted(theme_data.keys(), key=lambda k: theme_data[k]
+            theme_keys = sorted(theme_data.keys(), key=lambda k: theme_data[k])
