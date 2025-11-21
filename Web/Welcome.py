@@ -161,14 +161,14 @@ with col_settings:
 st.header("Welcome!")
 st.markdown(
     """
-    This dashboard provides a simple structure to manage your garden-related stocks.
+    This dashboard provides a simple structure to let you keep up the the grow a garden stock! ☘️
 
     Click the **'⚙️'** button above to open the theme selector dialog and choose your theme.
 
-    ### Dashboard Pages (Sidebar)
-    - **🌾 Seed Stock:** Inventory of available seeds.
-    - **🥚 Egg Stock:** Inventory of creature eggs.
-    - **⚙️ Gear Stock:** Tools and equipment inventory.
-    - **🌥️ Weather and Mutations:** Analysis of environmental factors.
+    ### Dashboard Pages
+    - **🌾 Seed Stock:** Info on the current seeds in stock.
+    - **🥚 Egg Stock:** Info on the current eggs in stock.
+    - **⚙️ Gear Stock:** Info on the current gear in stock.
+    - **🌥️ Weather and Mutations:** Info on the current weather and mutations that can be applied to your plants.
     """
 )
