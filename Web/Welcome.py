@@ -161,7 +161,7 @@ with col_settings:
 st.header("Welcome!")
 st.markdown(
     """
-    This dashboard provides a simple structure to let you keep up the the grow a garden stock! ☘️
+    This dashboard provides a simple structure to let you keep up with the **Grow a Garden** stock! ☘️
 
     Click the **'⚙️'** button above to open the theme selector dialog and choose your theme.
 
