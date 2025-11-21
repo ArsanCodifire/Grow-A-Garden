@@ -44,11 +44,11 @@ if "theme_data" not in st.session_state:
 theme_data = st.session_state["theme_data"]
 
 
-# 2. Theme Changer Initialization (Mandatory: Must run first to set the theme globally)
+# 2. Theme Changer Initialization (Must run first to set the theme globally)
 st_theme_changer(
     themes_data=theme_data, 
     render_mode="init", 
-    default_init_theme_name="garden_dark_theme", 
+    default_init_theme_name="garden_dark", # <-- Default is now set to dark mode
     key="theme_init"
 )
 
@@ -60,9 +60,10 @@ def open_settings_dialog():
     """
     Defines the content shown inside the modal dialog.
     """
+    st.header("App Settings")
     st.markdown("---")
 
-    # 1. Quick Theme Picker (The 3 Core Themes)
+    # 1. Quick Theme Picker (The 2 Core Themes)
     st.subheader("🎨 Theme Switch")
     st.markdown("Select your preferred core theme.")
     
@@ -76,7 +77,7 @@ def open_settings_dialog():
     
     st.markdown("---")
 
-    # 2. Theme Editor (Placeholder, now removed for stability/simplicity)
+    # 2. Theme Editor (Placeholder)
     st.subheader("🛠️ Custom Theme Maker")
     st.warning("The custom theme editor is currently disabled for stability. Use the switches above.")
     
@@ -99,7 +100,6 @@ with col_title:
 
 with col_settings:
     # 4. Button to open the dialog
-    # We call the decorated function directly when the button is pressed.
     if st.button("⚙️", key="settings_button"):
         open_settings_dialog()
 
@@ -110,7 +110,7 @@ st.markdown(
     """
     This dashboard provides a simple structure to manage your garden-related stocks.
 
-    Click the **'⚙️ Settings'** button above to open the theme selector dialog and choose between **Garden Oasis (Light)** and **Midnight Flora (Dark)**.
+    Click the **'⚙️'** button above to open the theme selector dialog and choose your theme.
 
     ### Dashboard Pages (Sidebar)
     - **🌾 Seed Stock:** Inventory of available seeds.
