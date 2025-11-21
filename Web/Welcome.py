@@ -70,7 +70,6 @@ def open_settings_dialog():
     """
     Defines the content shown inside the modal dialog.
     """
-    st.header("App Settings")
     st.markdown("---")
 
     # 1. Quick Theme Picker (The 3 Core Themes)
@@ -111,7 +110,7 @@ with col_title:
 with col_settings:
     # 4. Button to open the dialog
     # We call the decorated function directly when the button is pressed.
-    if st.button("⚙️ Settings", key="settings_button"):
+    if st.button("⚙️", key="settings_button"):
         open_settings_dialog()
 
 
