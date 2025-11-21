@@ -62,7 +62,6 @@ def open_settings_dialog():
     """
     Defines the content shown inside the modal dialog.
     """
-    st.header("App Settings")
     st.markdown("---")
 
     # 1. Quick Theme Picker (The 2 Core Themes)
