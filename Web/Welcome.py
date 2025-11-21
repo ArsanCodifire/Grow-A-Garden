@@ -30,18 +30,8 @@ garden_dark_theme = ThemeInput(
     )
 )
 
-# System Default (Auto) - Mandatory for theme changer auto-detection
-system_default_theme = ThemeInput(
-    name="System Default (Auto)",
-    icon="✨", 
-    order=0, 
-    themeInfo=garden_light_theme.themeInfo 
-)
-
-
-# Dictionary containing ONLY the 3 core themes
+# Dictionary containing ONLY the 2 core themes
 init_theme_data = {
-    'system_default_theme': system_default_theme,
     'garden_light': garden_light_theme,
     'garden_dark': garden_dark_theme,
 }
