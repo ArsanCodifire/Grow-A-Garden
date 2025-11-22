@@ -168,6 +168,7 @@ st.markdown(
     - **🌾 Seed Stock:** Info on the current seeds in stock.
     - **🥚 Egg Stock:** Info on the current eggs in stock.
     - **⚙️ Gear Stock:** Info on the current gear in stock.
+    - **✨ Cosmetic Sock:** Info on the current cosmetics in stock.
     - **🌥️ Weather and Mutations:** Info on the current weather and mutations that can be applied to your plants.
     """
 )
