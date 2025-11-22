@@ -4,4 +4,5 @@ Shows
 - 🌾 Seed Stock
 - 🥚 Egg Stock
 - ⚙️ Gear Stock
+- ✨ Cosmetic Stock
 - 🌥️ Weather
