@@ -4,9 +4,15 @@ import streamlit as st
 from streamlit_plugins.components.theme_changer import st_theme_changer
 from streamlit_plugins.components.theme_changer.entity import ThemeInfo, ThemeInput, ThemeBaseLight, ThemeBaseDark
 
-# --- Theme Definitions (Only 2 Core Themes) ---
+# --- Configuration ---
+# Define theme keys that are protected from editing
+PROTECTED_THEMES = ['garden_light', 'garden_dark']
+CUSTOM_THEME_KEY = 'custom_theme_key'
+DEFAULT_INIT_THEME = 'garden_dark'
 
-# Garden Oasis (Light)
+# --- Theme Definitions ---
+
+# Garden Oasis (Light) - CORE THEME
 garden_light_theme = ThemeInput(
     name="Garden Oasis (Light)",
     icon="🌿", 
@@ -19,7 +25,7 @@ garden_light_theme = ThemeInput(
     )
 )
 
-# Midnight Flora (Dark)
+# Midnight Flora (Dark) - CORE THEME
 garden_dark_theme = ThemeInput(
     name="Midnight Flora (Dark)",
     icon="🌙", 
@@ -32,10 +38,25 @@ garden_dark_theme = ThemeInput(
     )
 )
 
-# Dictionary containing ONLY the 2 core themes
+# Custom Theme - HIDDEN/EDITABLE THEME (Starts based on dark theme)
+custom_theme = ThemeInput(
+    name="Custom Theme",
+    icon="🖌️", 
+    order=3,
+    themeInfo=ThemeInfo(
+        base=ThemeBaseDark.base, primaryColor="#FF5722", backgroundColor="#212121", 
+        secondaryBackgroundColor="#3A3A3A", textColor="#FFFFFF", widgetBackgroundColor="#424242", 
+        widgetBorderColor="#FF9800", skeletonBackgroundColor="#4E4E4E", bodyFont=ThemeBaseDark.bodyFont,
+        codeFont=ThemeBaseDark.codeFont, fontFaces=ThemeBaseDark.fontFaces
+    )
+)
+
+
+# Dictionary containing ALL themes (Core + Custom)
 init_theme_data = {
     'garden_light': garden_light_theme,
     'garden_dark': garden_dark_theme,
+    CUSTOM_THEME_KEY: custom_theme,
 }
 
 
@@ -50,7 +71,7 @@ theme_data = st.session_state["theme_data"]
 st_theme_changer(
     themes_data=theme_data, 
     render_mode="init", 
-    default_init_theme_name="garden_dark", # <-- Default is now set to dark mode
+    default_init_theme_name=DEFAULT_INIT_THEME,
     key="theme_init"
 )
 
@@ -62,76 +83,75 @@ def open_settings_dialog():
     """
     Defines the content shown inside the modal dialog.
     """
+    # Removed st.header("App Settings") to fix the duplicate title issue.
     st.markdown("---")
 
-    # 1. Quick Theme Picker (The 2 Core Themes)
+    # 1. Quick Theme Picker (Excluding the hidden custom theme)
     st.subheader("🎨 Theme Switch")
+    st.caption("Quickly switch between protected core themes.")
     
+    # Filter the themes to only show selectable themes (excluding custom_theme_key)
+    selectable_themes = {k: v for k, v in theme_data.items() if k != CUSTOM_THEME_KEY}
+
     # Renders the theme selection component
     st_theme_changer(
-        themes_data=theme_data, 
-        render_mode="pills", # A clean, pill-shaped UI for switching
+        themes_data=selectable_themes, 
+        render_mode="pills",
         rerun_whole_st=True, 
         key="dialog_theme_picker"
     )
     
     st.markdown("---")
 
-    # 2. Custom Theme Maker (Fully Functional)
+    # 2. Custom Theme Maker (Focus on the new custom_theme)
     with st.expander("🛠️ Custom Theme Maker", expanded=False):
-        st.caption("Edit the properties of your themes below.")
+        st.info("Edit the colors of the dedicated 'Custom Theme'. Saving changes automatically activates it.")
         
-        # Tabs for each theme available in the data
-        theme_keys = list(theme_data.keys())
-        tabs = st.tabs([theme_data[k].name for k in theme_keys])
+        current_theme = theme_data[CUSTOM_THEME_KEY]
         
-        for i, tab in enumerate(tabs):
-            theme_key = theme_keys[i]
-            current_theme = theme_data[theme_key]
+        # --- START EDITING FORM for CUSTOM_THEME_KEY ---
+        with st.form(key=f"edit_form_{CUSTOM_THEME_KEY}"):
+            st.markdown(f"**Editing: {current_theme.name}**")
             
-            with tab:
-                # We use a form to prevent reload on every single color change
-                with st.form(key=f"edit_form_{theme_key}"):
-                    st.markdown(f"**Editing: {current_theme.name}**")
-                    
-                    # COLORS
-                    c1, c2 = st.columns(2)
-                    new_primary = c1.color_picker("Primary Color", current_theme.themeInfo.primaryColor)
-                    new_text = c2.color_picker("Text Color", current_theme.themeInfo.textColor)
-                    
-                    c3, c4 = st.columns(2)
-                    new_bg = c3.color_picker("Background", current_theme.themeInfo.backgroundColor)
-                    new_sec_bg = c4.color_picker("Sidebar/Secondary", current_theme.themeInfo.secondaryBackgroundColor)
-                    
-                    c5, c6 = st.columns(2)
-                    new_widget_bg = c5.color_picker("Widget Background", current_theme.themeInfo.widgetBackgroundColor)
-                    new_widget_border = c6.color_picker("Widget Border", current_theme.themeInfo.widgetBorderColor)
+            # COLORS
+            c1, c2 = st.columns(2)
+            new_primary = c1.color_picker("Primary Color", current_theme.themeInfo.primaryColor)
+            new_text = c2.color_picker("Text Color", current_theme.themeInfo.textColor)
+            
+            c3, c4 = st.columns(2)
+            new_bg = c3.color_picker("Background", current_theme.themeInfo.backgroundColor)
+            new_sec_bg = c4.color_picker("Sidebar/Secondary", current_theme.themeInfo.secondaryBackgroundColor)
+            
+            c5, c6 = st.columns(2)
+            new_widget_bg = c5.color_picker("Widget Background", current_theme.themeInfo.widgetBackgroundColor)
+            new_widget_border = c6.color_picker("Widget Border", current_theme.themeInfo.widgetBorderColor)
 
-                    # FONTS (Simple Text Inputs)
-                    st.markdown("---")
-                    st.caption("Font Settings")
-                    f1, f2 = st.columns(2)
-                    new_body_font = f1.text_input("Body Font", value=current_theme.themeInfo.bodyFont)
-                    new_code_font = f2.text_input("Code Font", value=current_theme.themeInfo.codeFont)
+            # FONTS (Simple Text Inputs)
+            st.markdown("---")
+            st.caption("Font Settings")
+            f1, f2 = st.columns(2)
+            new_body_font = f1.text_input("Body Font", value=current_theme.themeInfo.bodyFont)
+            new_code_font = f2.text_input("Code Font", value=current_theme.themeInfo.codeFont)
 
-                    # SAVE BUTTON
-                    submitted = st.form_submit_button("Save Changes")
-                    
-                    if submitted:
-                        # Update the session state object
-                        theme_data[theme_key].themeInfo.primaryColor = new_primary
-                        theme_data[theme_key].themeInfo.textColor = new_text
-                        theme_data[theme_key].themeInfo.backgroundColor = new_bg
-                        theme_data[theme_key].themeInfo.secondaryBackgroundColor = new_sec_bg
-                        theme_data[theme_key].themeInfo.widgetBackgroundColor = new_widget_bg
-                        theme_data[theme_key].themeInfo.widgetBorderColor = new_widget_border
-                        theme_data[theme_key].themeInfo.bodyFont = new_body_font
-                        theme_data[theme_key].themeInfo.codeFont = new_code_font
-                        
-                        st.session_state["theme_data"] = theme_data
-                        
-                        # Force a rerun to apply the new colors immediately
-                        st.rerun()
+            # SAVE BUTTON
+            if st.form_submit_button("💾 Save Changes and Apply"):
+                # Update the session state object with new values
+                theme_data[CUSTOM_THEME_KEY].themeInfo.primaryColor = new_primary
+                theme_data[CUSTOM_THEME_KEY].themeInfo.textColor = new_text
+                theme_data[CUSTOM_THEME_KEY].themeInfo.backgroundColor = new_bg
+                theme_data[CUSTOM_THEME_KEY].themeInfo.secondaryBackgroundColor = new_sec_bg
+                theme_data[CUSTOM_THEME_KEY].themeInfo.widgetBackgroundColor = new_widget_bg
+                theme_data[CUSTOM_THEME_KEY].themeInfo.widgetBorderColor = new_widget_border
+                theme_data[CUSTOM_THEME_KEY].themeInfo.bodyFont = new_body_font
+                theme_data[CUSTOM_THEME_KEY].themeInfo.codeFont = new_code_font
+                
+                st.session_state["theme_data"] = theme_data
+                
+                # --- AUTO-SELECT CUSTOM THEME ---
+                # We update the component's internal state to force selection of the newly edited theme.
+                st.session_state[f"{st.session_state['theme_init']}_active_theme"] = CUSTOM_THEME_KEY
+                st.toast("Custom theme saved and applied!")
+                st.rerun()
 
     st.markdown("---")
     
@@ -162,7 +182,7 @@ st.markdown(
     """
     This dashboard provides a simple structure to let you keep up with the **Grow a Garden** stock! ☘️
 
-    Click the **'⚙️'** button above to open the theme selector dialog and choose your theme.
+    Click the **'⚙️'** button above to open the settings dialog. You can customize the app's look by editing the **Custom Theme Maker**; saving changes will automatically apply your new look!
 
     ### Dashboard Pages
     - **🌾 Seed Stock:** Info on the current seeds in stock.
