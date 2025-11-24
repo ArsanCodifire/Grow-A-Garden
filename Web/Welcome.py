@@ -1,18 +1,12 @@
 import streamlit as st
 
-# The st_theme_changer plugin is used for persistent, global theme management.
 from streamlit_plugins.components.theme_changer import st_theme_changer
 from streamlit_plugins.components.theme_changer.entity import ThemeInfo, ThemeInput, ThemeBaseLight, ThemeBaseDark
 
-# --- Configuration ---
-# Define theme keys that are protected from editing
 PROTECTED_THEMES = ['garden_light', 'garden_dark']
 CUSTOM_THEME_KEY = 'custom_theme_key'
 DEFAULT_INIT_THEME = 'garden_dark'
 
-# --- Theme Definitions ---
-
-# Garden Oasis (Light) - CORE THEME
 garden_light_theme = ThemeInput(
     name="Garden Oasis (Light)",
     icon="🌿", 
@@ -25,7 +19,6 @@ garden_light_theme = ThemeInput(
     )
 )
 
-# Midnight Flora (Dark) - CORE THEME
 garden_dark_theme = ThemeInput(
     name="Midnight Flora (Dark)",
     icon="🌙", 
@@ -38,7 +31,6 @@ garden_dark_theme = ThemeInput(
     )
 )
 
-# Custom Theme - HIDDEN/EDITABLE THEME (Starts based on dark theme)
 custom_theme = ThemeInput(
     name="Custom Theme",
     icon="🖌️", 
@@ -51,23 +43,17 @@ custom_theme = ThemeInput(
     )
 )
 
-
-# Dictionary containing ALL themes (Core + Custom)
 init_theme_data = {
     'garden_light': garden_light_theme,
     'garden_dark': garden_dark_theme,
     CUSTOM_THEME_KEY: custom_theme,
 }
 
-
-# 1. Initialize session state variables
 if "theme_data" not in st.session_state:
     st.session_state["theme_data"] = init_theme_data
 
 theme_data = st.session_state["theme_data"]
 
-
-# 2. Theme Changer Initialization (Must run first to set the theme globally)
 st_theme_changer(
     themes_data=theme_data, 
     render_mode="init", 
@@ -75,25 +61,15 @@ st_theme_changer(
     key="theme_init"
 )
 
-
-# --- Settings Dialogue DEFINITION (using the @st.dialog decorator) ---
-
 @st.dialog("App Settings", width="small")
 def open_settings_dialog():
-    """
-    Defines the content shown inside the modal dialog.
-    """
-    # Removed st.header("App Settings") to fix the duplicate title issue.
     st.markdown("---")
 
-    # 1. Quick Theme Picker (Excluding the hidden custom theme)
     st.subheader("🎨 Theme Switch")
     st.caption("Quickly switch between protected core themes.")
     
-    # Filter the themes to only show selectable themes (excluding custom_theme_key)
     selectable_themes = {k: v for k, v in theme_data.items() if k != CUSTOM_THEME_KEY}
 
-    # Renders the theme selection component
     st_theme_changer(
         themes_data=selectable_themes, 
         render_mode="pills",
@@ -103,17 +79,14 @@ def open_settings_dialog():
     
     st.markdown("---")
 
-    # 2. Custom Theme Maker (Focus on the new custom_theme)
-    with st.expander("🛠️ Custom Theme Maker", expanded=False):
+    with st.expander("🛠️ Custom Theme Maker", expanded=True):
         st.info("Edit the colors of the dedicated 'Custom Theme'. Saving changes automatically activates it.")
         
         current_theme = theme_data[CUSTOM_THEME_KEY]
         
-        # --- START EDITING FORM for CUSTOM_THEME_KEY ---
         with st.form(key=f"edit_form_{CUSTOM_THEME_KEY}"):
             st.markdown(f"**Editing: {current_theme.name}**")
             
-            # COLORS
             c1, c2 = st.columns(2)
             new_primary = c1.color_picker("Primary Color", current_theme.themeInfo.primaryColor)
             new_text = c2.color_picker("Text Color", current_theme.themeInfo.textColor)
@@ -126,16 +99,13 @@ def open_settings_dialog():
             new_widget_bg = c5.color_picker("Widget Background", current_theme.themeInfo.widgetBackgroundColor)
             new_widget_border = c6.color_picker("Widget Border", current_theme.themeInfo.widgetBorderColor)
 
-            # FONTS (Simple Text Inputs)
             st.markdown("---")
             st.caption("Font Settings")
             f1, f2 = st.columns(2)
             new_body_font = f1.text_input("Body Font", value=current_theme.themeInfo.bodyFont)
             new_code_font = f2.text_input("Code Font", value=current_theme.themeInfo.codeFont)
 
-            # SAVE BUTTON
             if st.form_submit_button("💾 Save Changes and Apply"):
-                # Update the session state object with new values
                 theme_data[CUSTOM_THEME_KEY].themeInfo.primaryColor = new_primary
                 theme_data[CUSTOM_THEME_KEY].themeInfo.textColor = new_text
                 theme_data[CUSTOM_THEME_KEY].themeInfo.backgroundColor = new_bg
@@ -147,36 +117,30 @@ def open_settings_dialog():
                 
                 st.session_state["theme_data"] = theme_data
                 
-                # --- AUTO-SELECT CUSTOM THEME ---
-                # We update the component's internal state to force selection of the newly edited theme.
                 st.session_state["theme_init_active_theme"] = CUSTOM_THEME_KEY 
+                
                 st.toast("Custom theme saved and applied!")
-                st.rerun()
+                
+                st.dialog.close()
+
 
     st.markdown("---")
     
-    # 3. Music Option (Placeholder)
     st.subheader("🎵 Other Settings")
     st.toggle("Enable Background Music", value=False, disabled=True, help="Coming soon!")
     
     if st.button("Close Settings"):
-        st.rerun()
+        st.dialog.close()
         
-# --- Main Application Layout ---
-
-# Use columns to place the title and the settings button on the same line
 col_title, col_settings = st.columns([10, 1])
 
 with col_title:
     st.title("🌱 Grow a Garden Stock Dashboard")
 
 with col_settings:
-    # 4. Button to open the dialog
     if st.button("⚙️", key="settings_button"):
         open_settings_dialog()
 
-
-# 5. Display main app content
 st.header("Welcome!")
 st.markdown(
     """
