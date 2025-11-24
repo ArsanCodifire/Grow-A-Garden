@@ -121,7 +121,7 @@ def open_settings_dialog():
                 
                 st.toast("Custom theme saved and applied!")
                 
-                st.dialog.close()
+                st.rerun()
 
 
     st.markdown("---")
@@ -130,7 +130,7 @@ def open_settings_dialog():
     st.toggle("Enable Background Music", value=False, disabled=True, help="Coming soon!")
     
     if st.button("Close Settings"):
-        st.dialog.close()
+        st.rerun()
         
 col_title, col_settings = st.columns([10, 1])
 
