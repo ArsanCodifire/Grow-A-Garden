@@ -66,12 +66,11 @@ def open_settings_dialog():
     st.markdown("---")
 
     st.subheader("🎨 Theme Switch")
-    st.caption("Quickly switch between protected core themes.")
+    st.caption("Quickly switch between protected core themes and your custom theme.")
     
-    selectable_themes = {k: v for k, v in theme_data.items() if k != CUSTOM_THEME_KEY}
-
+    # Now passing the entire theme_data, including the custom theme
     st_theme_changer(
-        themes_data=selectable_themes, 
+        themes_data=theme_data, 
         render_mode="pills",
         rerun_whole_st=True, 
         key="dialog_theme_picker"
