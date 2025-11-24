@@ -149,7 +149,7 @@ def open_settings_dialog():
                 
                 # --- AUTO-SELECT CUSTOM THEME ---
                 # We update the component's internal state to force selection of the newly edited theme.
-                st.session_state[f"{st.session_state['theme_init']}_active_theme"] = CUSTOM_THEME_KEY
+                st.session_state["theme_init_active_theme"] = CUSTOM_THEME_KEY 
                 st.toast("Custom theme saved and applied!")
                 st.rerun()
 
