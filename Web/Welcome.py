@@ -66,7 +66,7 @@ def open_settings_dialog():
     st.markdown("---")
 
     st.subheader("🎨 Theme Switch")
-    st.caption("Quickly switch between protected core themes and your custom theme.")
+    st.caption("Quickly switch between core themes and your creative custom themes!")
     
     # Now passing the entire theme_data, including the custom theme
     st_theme_changer(
@@ -79,7 +79,6 @@ def open_settings_dialog():
     st.markdown("---")
 
     with st.expander("🛠️ Custom Theme Maker", expanded=True):
-        st.info("Edit the colors of the dedicated 'Custom Theme'. Saving changes automatically activates it.")
         
         current_theme = theme_data[CUSTOM_THEME_KEY]
         
