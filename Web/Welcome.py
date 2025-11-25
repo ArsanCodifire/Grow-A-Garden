@@ -49,8 +49,14 @@ init_theme_data = {
     CUSTOM_THEME_KEY: custom_theme,
 }
 
-if "theme_data" not in st.session_state:
-    st.session_state["theme_data"] = init_theme_data
+def _init_session_state():
+    if "theme_data" not in st.session_state:
+        st.session_state["theme_data"] = init_theme_data
+
+    if "music_on" not in st.session_state:
+        st.session_state["music_on"] = False
+
+_init_session_state()
 
 theme_data = st.session_state["theme_data"]
 
@@ -68,7 +74,6 @@ def open_settings_dialog():
     st.subheader("🎨 Theme Switch")
     st.caption("Quickly switch between core themes and your creative custom themes!")
     
-    # Now passing the entire theme_data, including the custom theme
     st_theme_changer(
         themes_data=theme_data, 
         render_mode="pills",
@@ -125,6 +130,7 @@ def open_settings_dialog():
     st.markdown("---")
     
     st.subheader("🎵 Other Settings")
+    
     music_status = st.toggle("Enable Background Music", value=st.session_state["music_on"], key="dialog_music_toggle")
     st.session_state["music_on"] = music_status
     
@@ -155,5 +161,6 @@ st.markdown(
     - **🌥️ Weather and Mutations:** Info on the current weather and mutations that can be applied to your plants.
     """
 )
+
 if st.session_state.get("music_on", False):
-    st.audio("GAG.mp3", loop=True, autoplay=True)
+    st.audio("../GAG.mp3", loop=True, autoplay=True)
