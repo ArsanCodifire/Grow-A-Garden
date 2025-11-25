@@ -125,7 +125,8 @@ def open_settings_dialog():
     st.markdown("---")
     
     st.subheader("🎵 Other Settings")
-    st.toggle("Enable Background Music", value=False, disabled=True, help="Coming soon!")
+    music_status = st.toggle("Enable Background Music", value=st.session_state["music_on"], key="dialog_music_toggle")
+    st.session_state["music_on"] = music_status
     
     if st.button("Close Settings"):
         st.rerun()
@@ -154,3 +155,5 @@ st.markdown(
     - **🌥️ Weather and Mutations:** Info on the current weather and mutations that can be applied to your plants.
     """
 )
+if st.session_state["music_on"]:
+    st.audio("GAG.mp3", loop=True, autoplay=True)
