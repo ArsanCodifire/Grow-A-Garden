@@ -155,5 +155,5 @@ st.markdown(
     - **🌥️ Weather and Mutations:** Info on the current weather and mutations that can be applied to your plants.
     """
 )
-if st.session_state["music_on"]:
+if st.session_state.get("music_on", False):
     st.audio("GAG.mp3", loop=True, autoplay=True)
