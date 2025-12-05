@@ -19,18 +19,18 @@ jobs:
       - name: Generate Multi-Timezone File Content 🌍
         id: timestamp
         run: |
-          # 1. Define Time Variables (Use export to make sure they are available)
+          # 1. Define Time Variables (Use export for reliability)
           export UTC_TIME=$(date -u "+%Y-%m-%d %H:%M:%S UTC")
           export IST_TIME=$(TZ='Asia/Kolkata' date "+%Y-%m-%d %H:%M:%S IST")
           export EST_TIME=$(TZ='America/New_York' date "+%Y-%m-%d %H:%M:%S EST")
 
-          # 2. Write Multi-line Content Directly to File
+          # 2. Write Multi-line Content Directly to File (INDENTATION FIXED HERE)
           cat << EOF > update.txt
-          --- Timestamps ---
-          UTC: $UTC_TIME
-          IST: $IST_TIME
-          EST: $EST_TIME
-          EOF
+--- Timestamps ---
+UTC: $UTC_TIME
+IST: $IST_TIME
+EST: $EST_TIME
+EOF
           # 3. Output Commit Message
           echo "COMMIT_MESSAGE=🤖 [Automated Wake-up] Updated times at $UTC_TIME" >> $GITHUB_OUTPUT
 
@@ -44,7 +44,7 @@ jobs:
           if git diff-index --quiet HEAD; then
             echo "No changes detected. Skipping commit."
           else
-            # 🌟 This is the fix: New commit ID every time.
+            # 🌟 FIX: New commit ID every time.
             git commit -m "${{ steps.timestamp.outputs.COMMIT_MESSAGE }}"
           fi
           
@@ -53,6 +53,7 @@ jobs:
           if git diff-index --quiet HEAD; then
             echo "Skipping push as no commit was made."
           else
-            # 🌟 This is the fix: Standard push (no --force-with-lease)
+            # 🌟 FIX: Standard push (no --force-with-lease)
             git push origin main
           fi
+          
