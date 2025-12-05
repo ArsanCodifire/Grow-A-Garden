@@ -1,8 +1,8 @@
-name: Scheduled UTC Update and Wake-Up
+Name: Scheduled UTC Update and Wake-Up
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # <-- MODIFIED: Runs every 30 minutes
+    - cron: '*/15 * * * *'  # Runs every 15 minutes
   workflow_dispatch:
 
 jobs:
@@ -40,11 +40,11 @@ jobs:
           git config user.email "actions@github.com"
           git add update.txt
           
-          # Check if the content of update.txt actually changed
+          # Check if the content changed before committing 
           if git diff-index --quiet HEAD; then
             echo "No changes detected. Skipping commit."
           else
-            # New: Commit normally, creating a new commit ID every time.
+            # 🌟 This is the fix: New commit ID every time.
             git commit -m "${{ steps.timestamp.outputs.COMMIT_MESSAGE }}"
           fi
           
@@ -53,7 +53,6 @@ jobs:
           if git diff-index --quiet HEAD; then
             echo "Skipping push as no commit was made."
           else
-            # New: Standard push is used, which works reliably for new commits.
+            # 🌟 This is the fix: Standard push (no --force-with-lease)
             git push origin main
           fi
-          
