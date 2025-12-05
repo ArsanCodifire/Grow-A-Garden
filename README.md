@@ -1,6 +1,6 @@
 # Grow-A-Garden
 A website for Grow A Garden
-Shows
+Stocks
 - 🌾 Seed Stock
 - 🥚 Egg Stock
 - ⚙️ Gear Stock
