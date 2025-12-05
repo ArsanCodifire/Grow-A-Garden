@@ -16,23 +16,19 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Generate Multi-Timezone File Content 🌍
+      - name: Generate UTC Timestamp (12-Hour Format) ✅
         id: timestamp
         run: |
-          # 1. Define Time Variables (Use export for reliability)
-          export UTC_TIME=$(date -u "+%Y-%m-%d %H:%M:%S UTC")
-          export IST_TIME=$(TZ='Asia/Kolkata' date "+%Y-%m-%d %H:%M:%S IST")
-          export EST_TIME=$(TZ='America/New_York' date "+%Y-%m-%d %H:%M:%S EST")
+          # Define Time Variable (UTC only, 12-hour format)
+          # %r provides the 12-hour time (HH:MM:SS AM/PM)
+          UTC_TIME=$(date -u "+%Y-%m-%d %r UTC")
 
-          # 2. Write Multi-line Content Directly to File (INDENTATION FIXED HERE)
+          # Write single-line Content Directly to File
           cat << EOF > update.txt
---- Timestamps ---
-UTC: $UTC_TIME
-IST: $IST_TIME
-EST: $EST_TIME
-EOF
-          # 3. Output Commit Message
-          echo "COMMIT_MESSAGE=🤖 [Automated Wake-up] Updated times at $UTC_TIME" >> $GITHUB_OUTPUT
+          Updated at: $UTC_TIME
+          EOF
+          # Output Commit Message
+          echo "COMMIT_MESSAGE=🤖 [Automated Wake-up] Updated at $UTC_TIME" >> $GITHUB_OUTPUT
 
       - name: Configure Git and Commit New Changes ✅
         run: |
@@ -44,7 +40,7 @@ EOF
           if git diff-index --quiet HEAD; then
             echo "No changes detected. Skipping commit."
           else
-            # 🌟 FIX: New commit ID every time.
+            # FIX: New commit ID every time.
             git commit -m "${{ steps.timestamp.outputs.COMMIT_MESSAGE }}"
           fi
           
@@ -53,7 +49,7 @@ EOF
           if git diff-index --quiet HEAD; then
             echo "Skipping push as no commit was made."
           else
-            # 🌟 FIX: Standard push (no --force-with-lease)
+            # FIX: Standard push (no --force-with-lease)
             git push origin main
           fi
           
