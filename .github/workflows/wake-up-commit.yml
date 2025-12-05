@@ -1,4 +1,4 @@
-Name: Scheduled UTC Update and Wake-Up
+name: Scheduled UTC Update and Wake-Up
 
 on:
   schedule:
