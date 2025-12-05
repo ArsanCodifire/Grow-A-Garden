@@ -1,4 +1,4 @@
-name: Scheduled UTC Update and Wake-Up
+Name: Scheduled UTC Update and Wake-Up
 
 on:
   schedule:
@@ -11,22 +11,22 @@ jobs:
     permissions:
       contents: write 
     steps:
-      - name: Checkout repository
+      - name: Checkout repository (Deep Clone) 🔄
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          # 💡 CRITICAL FIX: Ensure the runner fetches the full history to avoid using stale workflow code.
+          fetch-depth: 0 
           
       - name: Generate UTC Timestamp (12-Hour Format) ✅
         id: timestamp
         run: |
           # Define Time Variable (UTC only, 12-hour format)
-          # %r provides the 12-hour time (HH:MM:SS AM/PM)
           UTC_TIME=$(date -u "+%Y-%m-%d %r UTC")
 
-          # Write single-line Content Directly to File
-          cat << EOF > update.txt
-          Updated at: $UTC_TIME
-          EOF
+          # Write single-line Content
+          echo "Updated at: $UTC_TIME" > update.txt
+
           # Output Commit Message
           echo "COMMIT_MESSAGE=🤖 [Automated Wake-up] Updated at $UTC_TIME" >> $GITHUB_OUTPUT
 
@@ -49,7 +49,7 @@ jobs:
           if git diff-index --quiet HEAD; then
             echo "Skipping push as no commit was made."
           else
-            # FIX: Standard push (no --force-with-lease)
+            # FIX: Standard push.
             git push origin main
           fi
           
