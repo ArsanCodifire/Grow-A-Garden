@@ -77,7 +77,6 @@ def open_settings_dialog():
     st_theme_changer(
         themes_data=theme_data, 
         render_mode="pills",
-        rerun_whole_st=True, 
         key="dialog_theme_picker"
     )
     
